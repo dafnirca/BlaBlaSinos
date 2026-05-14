@@ -9,8 +9,8 @@
     <!-- ═══════════════════════════════════════════════
          Identificação do projeto
          ═══════════════════════════════════════════════ -->
-    <groupId>br.unisinos.caronas</groupId>
-    <artifactId>caronas-unisinos</artifactId>
+    <groupId>br.blablasinos</groupId>
+    <artifactId>BlaBlaSinos</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -46,7 +46,7 @@
         <maven.shade.plugin.version>3.6.0</maven.shade.plugin.version>
 
         <!-- Classe principal -->
-        <mainClass>br.unisinos.caronas.Main</mainClass>
+        <mainClass>br.blablasinos.Main</mainClass>
     </properties>
 
     <!-- ═══════════════════════════════════════════════
