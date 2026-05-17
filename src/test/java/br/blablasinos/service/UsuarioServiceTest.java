@@ -123,5 +123,15 @@ public class UsuarioServiceTest {
             }
             return Optional.ofNullable(usuariosPorEmail.get(email.trim().toLowerCase()));
         }
+
+        @Override
+        public void atualizarStatusDeBloqueio(String email, int tentativasFalhas, Long bloqueadoAte) {
+            Optional<Usuario> usuarioSalvo = buscarPorEmail(email);
+            if (usuarioSalvo.isPresent()) {
+                Usuario usuario = usuarioSalvo.get();
+                usuario.setTentativasFalhas(tentativasFalhas);
+                usuario.setBloqueadoAte(bloqueadoAte);
+            }
+        }
     }
 }

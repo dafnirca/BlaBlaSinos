@@ -12,6 +12,10 @@ public class Usuario {
 
     private TipoUsuario tipo;
 
+    private int tentativasFalhas;
+
+    private Long bloqueadoAte;
+
     public Usuario() {
     }
 
@@ -28,6 +32,27 @@ public class Usuario {
         this.email = email;
         this.senha = senha;
         this.tipo = tipo;
+        this.tentativasFalhas = 0;
+        this.bloqueadoAte = null;
+    }
+
+    public Usuario(
+        Long id,
+        String nome,
+        String email,
+        String senha,
+        TipoUsuario tipo,
+        int tentativasFalhas,
+        Long bloqueadoAte
+    ) {
+
+        this.id = id;
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha;
+        this.tipo = tipo;
+        this.tentativasFalhas = tentativasFalhas;
+        this.bloqueadoAte = bloqueadoAte;
     }
 
     public Long getId() {
@@ -68,5 +93,21 @@ public class Usuario {
 
     public void setTipo(TipoUsuario tipo) {
         this.tipo = tipo;
+    }
+
+    public int getTentativasFalhas() {
+        return tentativasFalhas;
+    }
+
+    public void setTentativasFalhas(int tentativasFalhas) {
+        this.tentativasFalhas = tentativasFalhas;
+    }
+
+    public Long getBloqueadoAte() {
+        return bloqueadoAte;
+    }
+
+    public void setBloqueadoAte(Long bloqueadoAte) {
+        this.bloqueadoAte = bloqueadoAte;
     }
 }

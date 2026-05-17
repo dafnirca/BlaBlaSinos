@@ -10,4 +10,6 @@ public interface UsuarioRepository {
     Usuario salvar(Usuario usuario);
 
     Optional<Usuario> buscarPorEmail(String email);
+
+    void atualizarStatusDeBloqueio(String email, int tentativasFalhas, Long bloqueadoAte);
 }

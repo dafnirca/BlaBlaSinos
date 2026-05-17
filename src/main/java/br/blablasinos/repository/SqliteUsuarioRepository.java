@@ -83,7 +83,7 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
             return Optional.empty();
         }
 
-        String sql = "SELECT id, nome, email, senha, tipo FROM usuarios WHERE lower(email) = lower(?) LIMIT 1";
+        String sql = "SELECT id, nome, email, senha, tipo, tentativas_falhas, bloqueado_ate FROM usuarios WHERE lower(email) = lower(?) LIMIT 1";
 
         try (Connection connection = criarConexao();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -97,8 +97,11 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
                     String emailSalvo = resultSet.getString("email");
                     String senha = resultSet.getString("senha");
                     TipoUsuario tipo = TipoUsuario.valueOf(resultSet.getString("tipo"));
+                    int tentativasFalhas = resultSet.getInt("tentativas_falhas");
+                    long bloqueadoAte = resultSet.getLong("bloqueado_ate");
+                    Long bloqueadoAteValue = resultSet.wasNull() ? null : bloqueadoAte;
 
-                    return Optional.of(new Usuario(id, nome, emailSalvo, senha, tipo));
+                    return Optional.of(new Usuario(id, nome, emailSalvo, senha, tipo, tentativasFalhas, bloqueadoAteValue));
                 }
             }
         } catch (SQLException exception) {
@@ -106,6 +109,28 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public void atualizarStatusDeBloqueio(String email, int tentativasFalhas, Long bloqueadoAte) {
+        String sql = "UPDATE usuarios SET tentativas_falhas = ?, bloqueado_ate = ? WHERE lower(email) = lower(?)";
+
+        try (Connection connection = criarConexao();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, tentativasFalhas);
+
+            if (bloqueadoAte == null) {
+                statement.setNull(2, java.sql.Types.BIGINT);
+            } else {
+                statement.setLong(2, bloqueadoAte);
+            }
+
+            statement.setString(3, email.trim());
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            throw new RuntimeException("Falha ao atualizar status de bloqueio.", exception);
+        }
     }
 
     private Connection criarConexao() throws SQLException {
@@ -118,13 +143,37 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
             + "nome TEXT NOT NULL, "
             + "email TEXT NOT NULL UNIQUE, "
             + "senha TEXT NOT NULL, "
-            + "tipo TEXT NOT NULL" + ")";
+            + "tipo TEXT NOT NULL, "
+            + "tentativas_falhas INTEGER NOT NULL DEFAULT 0, "
+            + "bloqueado_ate INTEGER" + ")";
 
         try (Connection connection = criarConexao();
              Statement statement = connection.createStatement()) {
             statement.execute(sql);
+            criarColunaSeNaoExistir(connection, "usuarios", "tentativas_falhas", "INTEGER NOT NULL DEFAULT 0");
+            criarColunaSeNaoExistir(connection, "usuarios", "bloqueado_ate", "INTEGER");
         } catch (SQLException exception) {
             throw new RuntimeException("Falha ao criar tabela de usuários.", exception);
+        }
+    }
+
+    private void criarColunaSeNaoExistir(Connection connection, String tabela, String coluna, String definicao) throws SQLException {
+        String pragma = "PRAGMA table_info(" + tabela + ")";
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(pragma)) {
+            boolean existe = false;
+
+            while (resultSet.next()) {
+                if (coluna.equalsIgnoreCase(resultSet.getString("name"))) {
+                    existe = true;
+                    break;
+                }
+            }
+
+            if (!existe) {
+                statement.execute("ALTER TABLE " + tabela + " ADD COLUMN " + coluna + " " + definicao);
+            }
         }
     }
 }
