@@ -10,28 +10,43 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>BlaBlaSinos - Login</title>
+    <title>BlaBlaSinos - Cadastro</title>
 
     <link
         rel="stylesheet"
-        href="css/login.css"
+        href="css/cadastro.css"
     >
 
 </head>
 
 <body>
 
-    <div class="login-container">
+    <div class="cadastro-container">
 
-        <div class="login-card">
+        <div class="cadastro-card">
 
             <h1>BlaBlaSinos</h1>
 
             <p class="subtitle">
-                Entre na sua conta
+                Criar nova conta
             </p>
 
-            <form id="login-form">
+            <form id="cadastro-form">
+
+                <div class="input-group">
+
+                    <label for="nome">
+                        Nome completo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nome"
+                        placeholder="Digite seu nome"
+                        required
+                    >
+
+                </div>
 
                 <div class="input-group">
 
@@ -63,18 +78,33 @@
 
                 </div>
 
+                <div class="input-group">
+
+                    <label for="confirmarSenha">
+                        Confirmar senha
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmarSenha"
+                        placeholder="Confirme sua senha"
+                        required
+                    >
+
+                </div>
+
                 <button type="submit">
-                    Entrar
+                    Cadastrar
                 </button>
 
             </form>
 
-            <p class="register-link">
+            <p class="login-link">
 
-                Não possui conta?
+                Já possui conta?
 
-                <a href="cadastro.html">
-                    Cadastre-se
+                <a href="login.html">
+                    Entrar
                 </a>
 
             </p>
@@ -83,7 +113,7 @@
 
     </div>
 
-    <script src="js/login.js"></script>
+    <script src="js/cadastro.js"></script>
 
 </body>
 
