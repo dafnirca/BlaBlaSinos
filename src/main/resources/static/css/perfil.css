@@ -108,3 +108,36 @@ button:hover {
 
     background: #2980b9;
 }
+
+.secondary-action {
+
+    margin-top: 16px;
+
+    text-align: center;
+}
+
+.secondary-action a {
+
+    display: inline-block;
+
+    padding: 12px 22px;
+
+    border-radius: 10px;
+
+    border: 1px solid #3498db;
+
+    color: #3498db;
+
+    text-decoration: none;
+
+    font-weight: bold;
+
+    transition: background 0.2s, color 0.2s;
+}
+
+.secondary-action a:hover {
+
+    background: #3498db;
+
+    color: white;
+}

@@ -1,0 +1,141 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f9;
+    padding: 30px;
+}
+
+.search-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.card {
+    background: white;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.search-card h2,
+.results-card h2 {
+    margin-bottom: 18px;
+    color: #34495e;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(200px, 1fr));
+    gap: 18px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-weight: bold;
+    color: #34495e;
+}
+
+.input-group input,
+.input-group select {
+    padding: 12px;
+    border: 1px solid #dcdde1;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+button {
+    margin-top: 20px;
+    width: 220px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #3498db;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.results-header span {
+    color: #7f8c8d;
+}
+
+.results-list {
+    display: grid;
+    gap: 18px;
+}
+
+.result-card {
+    border: 1px solid #e1e5eb;
+    border-radius: 12px;
+    padding: 18px;
+    display: grid;
+    gap: 12px;
+    background: #fafbfd;
+}
+
+.result-card strong {
+    color: #2c3e50;
+}
+
+.result-detail {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.result-detail span {
+    color: #4d5d73;
+}
+
+.empty-state {
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        width: 100%;
+    }
+}
