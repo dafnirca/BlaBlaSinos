@@ -1,0 +1,173 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f9;
+    padding: 30px;
+    color: #2c3e50;
+}
+
+.main-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.card {
+    background: white;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.card-header h2 {
+    color: #34495e;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e1e5eb;
+}
+
+th {
+    font-weight: bold;
+    color: #34495e;
+}
+
+td .actions button {
+    margin-right: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    width: auto;
+}
+
+.empty-state {
+    color: #7f8c8d;
+    font-style: italic;
+    text-align: center;
+    padding: 40px 0;
+}
+
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #3498db;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+button.btn-edit {
+    background: #f39c12;
+}
+button.btn-edit:hover {
+    background: #e67e22;
+}
+
+button.btn-delete {
+    background: #e74c3c;
+}
+button.btn-delete:hover {
+    background: #c0392b;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 14px;
+    width: 90%;
+    max-width: 600px;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-weight: bold;
+}
+
+.input-group input {
+    padding: 12px;
+    border: 1px solid #dcdde1;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.modal-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-actions button {
+    width: 140px;
+}
+
+#btn-cancelar-modal {
+    background: #bdc3c7;
+}
+#btn-cancelar-modal:hover {
+    background: #95a5a6;
+}
