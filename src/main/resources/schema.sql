@@ -5,5 +5,29 @@
     senha TEXT NOT NULL,
     tipo TEXT NOT NULL,
     tentativas_falhas INTEGER NOT NULL DEFAULT 0,
-    bloqueado_ate INTEGER
+    bloqueado_ate INTEGER,
+    cnh TEXT,
+    modelo_veiculo TEXT,
+    cor_veiculo TEXT,
+    placa_veiculo TEXT
+);
+
+CREATE TABLE IF NOT EXISTS caronas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    motorista_id INTEGER NOT NULL,
+    origem TEXT NOT NULL,
+    destino TEXT NOT NULL,
+    data_hora TEXT NOT NULL,
+    vagas_disponiveis INTEGER NOT NULL,
+    vagas_totais INTEGER NOT NULL,
+    FOREIGN KEY (motorista_id) REFERENCES usuarios (id)
+);
+
+CREATE TABLE IF NOT EXISTS reservas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    carona_id INTEGER NOT NULL,
+    passageiro_id INTEGER NOT NULL,
+    status TEXT NOT NULL, -- PENDENTE, CONFIRMADA, CANCELADA
+    FOREIGN KEY (carona_id) REFERENCES caronas (id),
+    FOREIGN KEY (passageiro_id) REFERENCES usuarios (id)
 );
