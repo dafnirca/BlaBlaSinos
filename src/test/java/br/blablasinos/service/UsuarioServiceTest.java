@@ -133,5 +133,8 @@ public class UsuarioServiceTest {
                 usuario.setBloqueadoAte(bloqueadoAte);
             }
         }
+
+        @Override
+        public void update(Usuario usuario) {}
     }
 }
