@@ -1,6 +1,6 @@
 const form = document.getElementById("cadastro-form");
 
-form.addEventListener("submit", function(event) {
+form.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
@@ -19,15 +19,25 @@ form.addEventListener("submit", function(event) {
         return;
     }
 
-    console.log("Cadastro enviado:");
+    try {
+        const response = await fetch('/api/cadastro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nome, email, senha })
+        });
 
-    console.log({
-        nome,
-        email,
-        senha
-    });
+        const result = await response.json();
 
-    alert("Cadastro enviado!");
-    // Redireciona para a tela de login após cadastro
-    window.location.href = "login.html";
+        if (response.ok) {
+            alert(result.message);
+            window.location.href = "login.html";
+        } else {
+            alert('Erro ao cadastrar: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Falha na comunicação com o servidor:', error);
+        alert('Não foi possível conectar ao servidor. Tente novamente.');
+    }
 });

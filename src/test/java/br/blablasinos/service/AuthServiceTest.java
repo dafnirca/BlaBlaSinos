@@ -134,5 +134,8 @@ public class AuthServiceTest {
                 usuarios.put(email.trim().toLowerCase(), atualizado);
             }
         }
+
+        @Override
+        public void update(Usuario usuario) {}
     }
 }

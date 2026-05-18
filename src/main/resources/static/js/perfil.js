@@ -43,16 +43,44 @@ window.onload = function() {
         mockUsuario.vagas;
 };
 
-document
-    .getElementById("perfil-form")
-    .addEventListener(
-        "submit",
-        function(event) {
+document.getElementById('form-perfil').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
-            event.preventDefault();
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        alert("Erro: Usuário não está logado. Faça o login novamente.");
+        window.location.href = '/login.html';
+        return;
+    }
 
-            alert(
-                "Perfil atualizado com sucesso!"
-            );
+    const dadosPerfil = {
+        id: parseInt(userId), // Envia o ID para o backend saber quem atualizar
+        nome: document.getElementById('nome').value,
+        cnh: document.getElementById('cnh').value,
+        modeloVeiculo: document.getElementById('modeloVeiculo').value,
+        corVeiculo: document.getElementById('corVeiculo').value,
+        placaVeiculo: document.getElementById('placaVeiculo').value
+        // Adicione outros campos se necessário
+    };
+
+    try {
+        const response = await fetch('/api/perfil', {
+            method: 'PUT', // O método que seu PerfilHandler espera
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosPerfil)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message); // "Perfil atualizado com sucesso!"
+        } else {
+            alert('Erro: ' + result.error);
         }
-    );
+    } catch (error) {
+        console.error('Falha na comunicação com o servidor:', error);
+        alert('Não foi possível conectar ao servidor. Tente novamente.');
+    }
+});

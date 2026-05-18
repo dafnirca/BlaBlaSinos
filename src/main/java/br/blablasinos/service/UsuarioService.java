@@ -1,5 +1,4 @@
 package br.blablasinos.service;
-
 import br.blablasinos.exception.UsuarioValidationException;
 import br.blablasinos.model.Usuario;
 import br.blablasinos.repository.SqliteUsuarioRepository;
@@ -30,5 +29,16 @@ public class UsuarioService {
         }
 
         return repository.salvar(usuario);
+    }
+
+    public void atualizarPerfil(Usuario usuario) throws UsuarioValidationException {
+        // No futuro, o UsuarioValidator pode ter um método para validar os campos do perfil
+        // UsuarioValidator.validarPerfil(usuario);
+
+        if (usuario.getId() == null) {
+            throw new IllegalArgumentException("ID do usuário não pode ser nulo para uma atualização.");
+        }
+        
+        repository.update(usuario); 
     }
 }

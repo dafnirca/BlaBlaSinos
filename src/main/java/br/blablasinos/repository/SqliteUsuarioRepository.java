@@ -152,10 +152,42 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
             statement.execute(sql);
             criarColunaSeNaoExistir(connection, "usuarios", "tentativas_falhas", "INTEGER NOT NULL DEFAULT 0");
             criarColunaSeNaoExistir(connection, "usuarios", "bloqueado_ate", "INTEGER");
+            
+            // ADICIONE ESTAS LINHAS
+            criarColunaSeNaoExistir(connection, "usuarios", "cnh", "TEXT");
+            criarColunaSeNaoExistir(connection, "usuarios", "modelo_veiculo", "TEXT");
+            criarColunaSeNaoExistir(connection, "usuarios", "cor_veiculo", "TEXT");
+            criarColunaSeNaoExistir(connection, "usuarios", "placa_veiculo", "TEXT");
+
         } catch (SQLException exception) {
             throw new RuntimeException("Falha ao criar tabela de usuários.", exception);
         }
     }
+
+    // NOVO MÉTODO
+    @Override
+    public void update(Usuario usuario) {
+        String sql = "UPDATE usuarios SET nome = ?, cnh = ?, modelo_veiculo = ?, cor_veiculo = ?, placa_veiculo = ? WHERE id = ?";
+
+        try (Connection connection = criarConexao();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setString(1, usuario.getNome());
+            statement.setString(2, usuario.getCnh());
+            statement.setString(3, usuario.getModeloVeiculo());
+            statement.setString(4, usuario.getCorVeiculo());
+            statement.setString(5, usuario.getPlacaVeiculo());
+            statement.setLong(6, usuario.getId());
+            
+            int linhasAfetadas = statement.executeUpdate();
+            if (linhasAfetadas == 0) {
+                throw new RuntimeException("Falha ao atualizar perfil, usuário não encontrado com id: " + usuario.getId());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Falha ao atualizar perfil do usuário.", e);
+        }
+    }
+
 
     private void criarColunaSeNaoExistir(Connection connection, String tabela, String coluna, String definicao) throws SQLException {
         String pragma = "PRAGMA table_info(" + tabela + ")";
