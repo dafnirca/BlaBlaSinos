@@ -1,6 +1,7 @@
 package br.blablasinos;
 
 import br.blablasinos.handler.CadastroHandler;
+import br.blablasinos.handler.LoginHandler;
 import br.blablasinos.handler.PerfilHandler;
 import br.blablasinos.handler.StaticFileHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -15,6 +16,7 @@ public class Main {
 
         server.createContext("/", new StaticFileHandler());
         server.createContext("/api/cadastro", new CadastroHandler());
+        server.createContext("/api/login", new LoginHandler());
         server.createContext("/api/perfil", new PerfilHandler());
         server.setExecutor(null); // Usa o executor padrão
         server.start();
