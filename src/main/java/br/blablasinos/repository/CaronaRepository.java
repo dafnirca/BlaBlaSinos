@@ -19,6 +19,12 @@ public class CaronaRepository {
 
     public CaronaRepository(String jdbcUrl) {
         this.url = jdbcUrl;
+        try {
+            // ESTA É A CORREÇÃO: Garante que a tabela seja criada ao iniciar.
+            criarTabela();
+        } catch (SQLException e) {
+            throw new RuntimeException("Falha ao inicializar e criar tabela de caronas.", e);
+        }
     }
 
 
@@ -259,6 +265,4 @@ public class CaronaRepository {
             rs.getInt   ("vagas_disponiveis")
         );
     }
-
-    
 }
