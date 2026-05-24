@@ -11,12 +11,9 @@ import java.util.Optional;
 import br.blablasinos.model.TipoUsuario;
 import br.blablasinos.model.Usuario;
 
-public class SqliteUsuarioRepository implements UsuarioRepository {
 
     private static final String DEFAULT_URL = "jdbc:sqlite:caronas.db";
     private final String databaseUrl;
-
-    public SqliteUsuarioRepository() {
         this(DEFAULT_URL);
     }
 

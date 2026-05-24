@@ -45,7 +45,6 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> buscarPorId(Long id) {
-        if (id == null) {
             throw new IllegalArgumentException("ID do usuário não pode ser nulo.");
         }
         return repository.buscarPorId(id);

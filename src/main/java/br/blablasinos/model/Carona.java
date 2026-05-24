@@ -1,0 +1,40 @@
+package br.blablasinos.model;
+
+import java.time.LocalDateTime;
+
+public class Carona {
+    private Long id;
+    private Long motoristaId;
+    private String origem;
+    private String destino;
+    private LocalDateTime dataHora;
+    private int vagasDisponiveis;
+    private int vagasTotais;
+
+    public Carona() {}
+
+    public Carona(Long id, Long motoristaId, String origem, String destino, LocalDateTime dataHora, int vagasDisponiveis, int vagasTotais) {
+        this.id = id;
+        this.motoristaId = motoristaId;
+        this.origem = origem;
+        this.destino = destino;
+        this.dataHora = dataHora;
+        this.vagasDisponiveis = vagasDisponiveis;
+        this.vagasTotais = vagasTotais;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getMotoristaId() { return motoristaId; }
+    public void setMotoristaId(Long motoristaId) { this.motoristaId = motoristaId; }
+    public String getOrigem() { return origem; }
+    public void setOrigem(String origem) { this.origem = origem; }
+    public String getDestino() { return destino; }
+    public void setDestino(String destino) { this.destino = destino; }
+    public LocalDateTime getDataHora() { return dataHora; }
+    public void setDataHora(LocalDateTime dataHora) { this.dataHora = dataHora; }
+    public int getVagasDisponiveis() { return vagasDisponiveis; }
+    public void setVagasDisponiveis(int vagasDisponiveis) { this.vagasDisponiveis = vagasDisponiveis; }
+    public int getVagasTotais() { return vagasTotais; }
+    public void setVagasTotais(int vagasTotais) { this.vagasTotais = vagasTotais; }
+}
