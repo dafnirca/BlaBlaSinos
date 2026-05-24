@@ -135,3 +135,9 @@ button:hover {
 
     font-weight: bold;
 }
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Faz os filtros ficarem um embaixo do outro */
+    }
+}

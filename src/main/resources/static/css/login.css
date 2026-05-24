@@ -134,3 +134,10 @@ button:hover {
 
     font-weight: bold;
 }
+
+/* Para telas com largura máxima de 768px (tablets e celulares) */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Faz os filtros ficarem um embaixo do outro */
+    }
+}

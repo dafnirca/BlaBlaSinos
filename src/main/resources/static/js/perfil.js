@@ -1,92 +1,88 @@
 const API_PERFIL = '/api/perfil';
 
-window.onload = async function() {
-    const userId = localStorage.getItem('userId');
+const nomeInput = document.getElementById('nome');
+const emailInput = document.getElementById('email');
+const cnhInput = document.getElementById('cnh');
+const modeloInput = document.getElementById('modelo');
+const corInput = document.getElementById('cor');
+const placaInput = document.getElementById('placa');
+const motoristaCheckbox = document.getElementById('sou-motorista-checkbox');
+const motoristaFieldsDiv = document.getElementById('motorista-fields');
+const minhasCaronasLink = document.getElementById('link-minhas-caronas');
+const perfilForm = document.getElementById('perfil-form');
 
+function toggleMotoristaFields() {
+    motoristaFieldsDiv.classList.toggle('hidden', !motoristaCheckbox.checked);
+}
+
+async function carregarPerfil() {
+    const userId = localStorage.getItem('userId');
     if (!userId) {
         alert("Erro: Usuário não está logado. Faça o login novamente.");
         window.location.href = '/login.html';
         return;
     }
-
-    document.getElementById('nome').value = localStorage.getItem('userNome') || '';
-    document.getElementById('email').value = localStorage.getItem('userEmail') || '';
 
     try {
         const response = await fetch(`${API_PERFIL}?id=${encodeURIComponent(userId)}`);
-        if (!response.ok) {
-            console.warn('Não foi possível carregar o perfil do usuário:', response.status);
-            return;
-        }
-
+        if (!response.ok) throw new Error(`Não foi possível carregar o perfil: ${response.status}`);
+        
         const usuario = await response.json();
 
-        if (usuario.cnh) {
-            document.getElementById('cnh').value = usuario.cnh;
+        nomeInput.value = usuario.nome || '';
+        emailInput.value = usuario.email || '';
+        cnhInput.value = usuario.cnh || '';
+        modeloInput.value = usuario.modeloVeiculo || '';
+        corInput.value = usuario.corVeiculo || '';
+        placaInput.value = usuario.placaVeiculo || '';
+
+        const isMotoristaCompleto = usuario.cnh && usuario.placaVeiculo;
+        if (isMotoristaCompleto) {
+            motoristaCheckbox.checked = true;
+            minhasCaronasLink.classList.remove('hidden');
+        } else {
+            minhasCaronasLink.classList.add('hidden');
         }
-        if (usuario.marcaVeiculo) {
-            document.getElementById('marca').value = usuario.marcaVeiculo;
-        }
-        if (usuario.vagas !== undefined && usuario.vagas !== null) {
-            document.getElementById('vagas').value = usuario.vagas;
-        }
-        if (usuario.marcaVeiculo) {
-            document.getElementById('marca').value = usuario.marcaVeiculo;
-        }
-        if (usuario.modeloVeiculo) {
-            document.getElementById('modelo').value = usuario.modeloVeiculo;
-        }
-        if (usuario.corVeiculo) {
-            document.getElementById('cor').value = usuario.corVeiculo;
-        }
-        if (usuario.placaVeiculo) {
-            document.getElementById('placa').value = usuario.placaVeiculo;
-        }
+        toggleMotoristaFields();
+
     } catch (error) {
         console.error('Falha ao carregar dados do perfil:', error);
     }
-};
+}
 
-document.getElementById('perfil-form').addEventListener('submit', async function(event) {
+async function salvarPerfil(event) {
     event.preventDefault();
-
     const userId = localStorage.getItem('userId');
-    if (!userId) {
-        alert("Erro: Usuário não está logado. Faça o login novamente.");
-        window.location.href = '/login.html';
-        return;
-    }
 
-        const vagasInput = document.getElementById('vagas').value;
-        const dadosPerfil = {
-            id: parseInt(userId), // Envia o ID para o backend saber quem atualizar
-            nome: document.getElementById('nome').value,
-            cnh: document.getElementById('cnh').value,
-            marcaVeiculo: document.getElementById('marca').value,
-            modeloVeiculo: document.getElementById('modelo').value,
-            corVeiculo: document.getElementById('cor').value,
-            placaVeiculo: document.getElementById('placa').value,
-            vagas: vagasInput ? parseInt(vagasInput) : null
-        };
+    const dadosPerfil = {
+        id: parseInt(userId),
+        nome: nomeInput.value,
+        cnh: cnhInput.value,
+        modeloVeiculo: modeloInput.value,
+        corVeiculo: corInput.value,
+        placaVeiculo: placaInput.value
+    };
 
     try {
-        const response = await fetch('/api/perfil', {
-            method: 'PUT', // O método que seu PerfilHandler espera
-            headers: {
-                'Content-Type': 'application/json'
-            },
+        const response = await fetch(API_PERFIL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dadosPerfil)
         });
-
         const result = await response.json();
 
         if (response.ok) {
-            alert(result.message); // "Perfil atualizado com sucesso!"
+            alert(result.message);
+            carregarPerfil();
         } else {
-            alert('Erro: ' + result.error);
+            throw new Error(result.error);
         }
     } catch (error) {
-        console.error('Falha na comunicação com o servidor:', error);
-        alert('Não foi possível conectar ao servidor. Tente novamente.');
+        console.error('Falha ao salvar perfil:', error);
+        alert(`Não foi possível salvar: ${error.message}`);
     }
-});
+}
+
+window.addEventListener('load', carregarPerfil);
+motoristaCheckbox.addEventListener('change', toggleMotoristaFields);
+perfilForm.addEventListener('submit', salvarPerfil);

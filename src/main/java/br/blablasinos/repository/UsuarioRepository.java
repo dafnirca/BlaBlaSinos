@@ -11,3 +11,4 @@ public interface UsuarioRepository {
     Optional<Usuario> buscarPorId(Long id);
     void atualizarStatusDeBloqueio(String email, int tentativasFalhas, Long bloqueadoAte);
     void update(Usuario usuario); 
+}

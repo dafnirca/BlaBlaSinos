@@ -91,19 +91,10 @@ button:hover {
     background: #2980b9;
 }
 
-button.btn-edit {
-    background: #f39c12;
-}
-button.btn-edit:hover {
-    background: #e67e22;
-}
-
-button.btn-delete {
-    background: #e74c3c;
-}
-button.btn-delete:hover {
-    background: #c0392b;
-}
+button.btn-edit { background: #f39c12; }
+button.btn-edit:hover { background: #e67e22; }
+button.btn-delete { background: #e74c3c; }
+button.btn-delete:hover { background: #c0392b; }
 
 /* Modal Styles */
 .modal-overlay {
@@ -127,47 +118,17 @@ button.btn-delete:hover {
     max-width: 600px;
 }
 
-.modal-content h2 {
-    margin-bottom: 20px;
-}
+.modal-content h2 { margin-bottom: 20px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-weight: bold; }
+.input-group input { padding: 12px; border: 1px solid #dcdde1; border-radius: 10px; font-size: 14px; }
+.modal-actions { margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; }
+.modal-actions button { width: 140px; }
+#btn-cancelar-modal { background: #bdc3c7; }
+#btn-cancelar-modal:hover { background: #95a5a6; }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.input-group label {
-    font-weight: bold;
-}
-
-.input-group input {
-    padding: 12px;
-    border: 1px solid #dcdde1;
-    border-radius: 10px;
-    font-size: 14px;
-}
-
-.modal-actions {
-    margin-top: 24px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-
-.modal-actions button {
-    width: 140px;
-}
-
-#btn-cancelar-modal {
-    background: #bdc3c7;
-}
-#btn-cancelar-modal:hover {
-    background: #95a5a6;
+/* CORREÇÃO: Classe para esconder elementos */
+.hidden {
+    display: none !important;
 }
