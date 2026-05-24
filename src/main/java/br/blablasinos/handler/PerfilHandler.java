@@ -1,14 +1,16 @@
 package br.blablasinos.handler;
 
-import br.blablasinos.model.Usuario;
-import br.blablasinos.service.UsuarioService;
-import com.google.gson.Gson;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+
+import com.google.gson.Gson;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+import br.blablasinos.model.Usuario;
+import br.blablasinos.service.UsuarioService;
 
 public class PerfilHandler implements HttpHandler {
 
@@ -22,8 +24,38 @@ public class PerfilHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        // Usaremos o método PUT para atualizações
-        if ("PUT".equals(exchange.getRequestMethod())) {
+        String method = exchange.getRequestMethod();
+        if ("GET".equalsIgnoreCase(method)) {
+            try {
+                String query = exchange.getRequestURI().getQuery();
+                Long userId = parseIdFromQuery(query);
+                if (userId == null) {
+                    sendResponse(exchange, 400, "{\"error\": \"ID de usuário ausente ou inválido\"}");
+                    return;
+                }
+
+                Usuario usuario = usuarioService.buscarPorId(userId)
+                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+                ProfileResponse profileResponse = new ProfileResponse(
+                    usuario.getId(),
+                    usuario.getNome(),
+                    usuario.getEmail(),
+                    usuario.getCnh(),
+                    usuario.getMarcaVeiculo(),
+                    usuario.getModeloVeiculo(),
+                    usuario.getCorVeiculo(),
+                    usuario.getPlacaVeiculo(),
+                    usuario.getVagas()
+                );
+
+                String response = gson.toJson(profileResponse);
+                sendResponse(exchange, 200, response);
+            } catch (Exception e) {
+                String errorResponse = "{\"error\": \"" + e.getMessage() + "\"}";
+                sendResponse(exchange, 400, errorResponse);
+            }
+        } else if ("PUT".equalsIgnoreCase(method)) {
             try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
                 Usuario usuario = gson.fromJson(reader, Usuario.class);
                 
@@ -40,6 +72,26 @@ public class PerfilHandler implements HttpHandler {
         } else {
             sendResponse(exchange, 405, "{\"error\": \"Metodo nao permitido\"}"); // 405 = Method Not Allowed
         }
+
+    }
+
+    private Long parseIdFromQuery(String query) {
+        if (query == null || query.isBlank()) {
+            return null;
+        }
+
+        for (String param : query.split("&")) {
+            String[] parts = param.split("=", 2);
+            if (parts.length == 2 && "id".equalsIgnoreCase(parts[0])) {
+                try {
+                    return Long.parseLong(parts[1]);
+                } catch (NumberFormatException ignored) {
+                    return null;
+                }
+            }
+        }
+
+        return null;
     }
 
     private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
@@ -48,5 +100,39 @@ public class PerfilHandler implements HttpHandler {
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes());
         }
+    }
+
+    private static class ProfileResponse {
+        private final Long id;
+        private final String nome;
+        private final String email;
+        private final String cnh;
+        private final String marcaVeiculo;
+        private final String modeloVeiculo;
+        private final String corVeiculo;
+        private final String placaVeiculo;
+        private final Integer vagas;
+
+        public ProfileResponse(Long id, String nome, String email, String cnh, String marcaVeiculo, String modeloVeiculo, String corVeiculo, String placaVeiculo, Integer vagas) {
+            this.id = id;
+            this.nome = nome;
+            this.email = email;
+            this.cnh = cnh;
+            this.marcaVeiculo = marcaVeiculo;
+            this.modeloVeiculo = modeloVeiculo;
+            this.corVeiculo = corVeiculo;
+            this.placaVeiculo = placaVeiculo;
+            this.vagas = vagas;
+        }
+
+        public Long getId() { return id; }
+        public String getNome() { return nome; }
+        public String getEmail() { return email; }
+        public String getCnh() { return cnh; }
+        public String getMarcaVeiculo() { return marcaVeiculo; }
+        public String getModeloVeiculo() { return modeloVeiculo; }
+        public String getCorVeiculo() { return corVeiculo; }
+        public String getPlacaVeiculo() { return placaVeiculo; }
+        public Integer getVagas() { return vagas; }
     }
 }

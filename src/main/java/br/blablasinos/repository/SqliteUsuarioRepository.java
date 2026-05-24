@@ -1,8 +1,5 @@
 package br.blablasinos.repository;
 
-import br.blablasinos.model.TipoUsuario;
-import br.blablasinos.model.Usuario;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,12 +8,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
-public class SqliteUsuarioRepository implements UsuarioRepository {
+import br.blablasinos.model.TipoUsuario;
+import br.blablasinos.model.Usuario;
+
 
     private static final String DEFAULT_URL = "jdbc:sqlite:caronas.db";
     private final String databaseUrl;
-
-    public SqliteUsuarioRepository() {
         this(DEFAULT_URL);
     }
 
@@ -83,7 +80,7 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
             return Optional.empty();
         }
 
-        String sql = "SELECT id, nome, email, senha, tipo, tentativas_falhas, bloqueado_ate FROM usuarios WHERE lower(email) = lower(?) LIMIT 1";
+        String sql = "SELECT id, nome, email, senha, tipo, tentativas_falhas, bloqueado_ate, cnh, marca_veiculo, modelo_veiculo, cor_veiculo, placa_veiculo, vagas FROM usuarios WHERE lower(email) = lower(?) LIMIT 1";
 
         try (Connection connection = criarConexao();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -100,12 +97,74 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
                     int tentativasFalhas = resultSet.getInt("tentativas_falhas");
                     long bloqueadoAte = resultSet.getLong("bloqueado_ate");
                     Long bloqueadoAteValue = resultSet.wasNull() ? null : bloqueadoAte;
+                    String cnh = resultSet.getString("cnh");
+                    String marcaVeiculo = resultSet.getString("marca_veiculo");
+                    String modeloVeiculo = resultSet.getString("modelo_veiculo");
+                    String corVeiculo = resultSet.getString("cor_veiculo");
+                    String placaVeiculo = resultSet.getString("placa_veiculo");
+                    int vagas = resultSet.getInt("vagas");
+                    Integer vagasValue = resultSet.wasNull() ? null : vagas;
 
-                    return Optional.of(new Usuario(id, nome, emailSalvo, senha, tipo, tentativasFalhas, bloqueadoAteValue));
+                    Usuario usuario = new Usuario(id, nome, emailSalvo, senha, tipo, tentativasFalhas, bloqueadoAteValue);
+                    usuario.setCnh(cnh);
+                    usuario.setMarcaVeiculo(marcaVeiculo);
+                    usuario.setModeloVeiculo(modeloVeiculo);
+                    usuario.setCorVeiculo(corVeiculo);
+                    usuario.setPlacaVeiculo(placaVeiculo);
+                    usuario.setVagas(vagasValue);
+                    return Optional.of(usuario);
                 }
             }
         } catch (SQLException exception) {
             throw new RuntimeException("Falha ao consultar usuário por e-mail.", exception);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Usuario> buscarPorId(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        String sql = "SELECT id, nome, email, senha, tipo, tentativas_falhas, bloqueado_ate, cnh, marca_veiculo, modelo_veiculo, cor_veiculo, placa_veiculo, vagas FROM usuarios WHERE id = ? LIMIT 1";
+
+        try (Connection connection = criarConexao();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Long usuarioId = resultSet.getLong("id");
+                    String nome = resultSet.getString("nome");
+                    String emailSalvo = resultSet.getString("email");
+                    String senha = resultSet.getString("senha");
+                    TipoUsuario tipo = TipoUsuario.valueOf(resultSet.getString("tipo"));
+                    int tentativasFalhas = resultSet.getInt("tentativas_falhas");
+                    long bloqueadoAte = resultSet.getLong("bloqueado_ate");
+                    Long bloqueadoAteValue = resultSet.wasNull() ? null : bloqueadoAte;
+                    String cnh = resultSet.getString("cnh");
+                    String marcaVeiculo = resultSet.getString("marca_veiculo");
+                    String modeloVeiculo = resultSet.getString("modelo_veiculo");
+                    String corVeiculo = resultSet.getString("cor_veiculo");
+                    String placaVeiculo = resultSet.getString("placa_veiculo");
+                    int vagas = resultSet.getInt("vagas");
+                    Integer vagasValue = resultSet.wasNull() ? null : vagas;
+
+                    Usuario usuario = new Usuario(usuarioId, nome, emailSalvo, senha, tipo, tentativasFalhas, bloqueadoAteValue);
+                    usuario.setCnh(cnh);
+                    usuario.setMarcaVeiculo(marcaVeiculo);
+                    usuario.setModeloVeiculo(modeloVeiculo);
+                    usuario.setCorVeiculo(corVeiculo);
+                    usuario.setPlacaVeiculo(placaVeiculo);
+                    usuario.setVagas(vagasValue);
+                    return Optional.of(usuario);
+                }
+            }
+        } catch (SQLException exception) {
+            throw new RuntimeException("Falha ao consultar usuário por id.", exception);
         }
 
         return Optional.empty();
@@ -155,9 +214,11 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
             
             // ADICIONE ESTAS LINHAS
             criarColunaSeNaoExistir(connection, "usuarios", "cnh", "TEXT");
+            criarColunaSeNaoExistir(connection, "usuarios", "marca_veiculo", "TEXT");
             criarColunaSeNaoExistir(connection, "usuarios", "modelo_veiculo", "TEXT");
             criarColunaSeNaoExistir(connection, "usuarios", "cor_veiculo", "TEXT");
             criarColunaSeNaoExistir(connection, "usuarios", "placa_veiculo", "TEXT");
+            criarColunaSeNaoExistir(connection, "usuarios", "vagas", "INTEGER");
 
         } catch (SQLException exception) {
             throw new RuntimeException("Falha ao criar tabela de usuários.", exception);
@@ -167,17 +228,23 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
     // NOVO MÉTODO
     @Override
     public void update(Usuario usuario) {
-        String sql = "UPDATE usuarios SET nome = ?, cnh = ?, modelo_veiculo = ?, cor_veiculo = ?, placa_veiculo = ? WHERE id = ?";
+        String sql = "UPDATE usuarios SET nome = ?, cnh = ?, marca_veiculo = ?, modelo_veiculo = ?, cor_veiculo = ?, placa_veiculo = ?, vagas = ? WHERE id = ?";
 
         try (Connection connection = criarConexao();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             
             statement.setString(1, usuario.getNome());
             statement.setString(2, usuario.getCnh());
-            statement.setString(3, usuario.getModeloVeiculo());
-            statement.setString(4, usuario.getCorVeiculo());
-            statement.setString(5, usuario.getPlacaVeiculo());
-            statement.setLong(6, usuario.getId());
+            statement.setString(3, usuario.getMarcaVeiculo());
+            statement.setString(4, usuario.getModeloVeiculo());
+            statement.setString(5, usuario.getCorVeiculo());
+            statement.setString(6, usuario.getPlacaVeiculo());
+            if (usuario.getVagas() == null) {
+                statement.setNull(7, java.sql.Types.INTEGER);
+            } else {
+                statement.setInt(7, usuario.getVagas());
+            }
+            statement.setLong(8, usuario.getId());
             
             int linhasAfetadas = statement.executeUpdate();
             if (linhasAfetadas == 0) {

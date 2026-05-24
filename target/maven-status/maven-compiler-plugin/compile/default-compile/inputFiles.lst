@@ -1,12 +1,17 @@
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\exception\UsuarioValidationException.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\handler\PerfilHandler.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\handler\StaticFileHandler.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\Main.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\model\Carona.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\model\TipoUsuario.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\model\Usuario.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\repository\SqliteUsuarioRepository.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\repository\UsuarioRepository.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\service\AuthService.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\service\UsuarioService.java
-C:\Users\Dafni\Documents\GitHub\BlaBlaSinos\src\main\java\br\blablasinos\validation\UsuarioValidator.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\exception\UsuarioValidationException.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\handler\CadastroHandler.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\handler\CaronaHandler.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\handler\LoginHandler.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\handler\PerfilHandler.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\handler\StaticFileHandler.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\Main.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\model\Carona.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\model\TipoUsuario.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\model\Usuario.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\repository\CaronaRepository.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\repository\SqliteUsuarioRepository.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\repository\UsuarioRepository.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\service\AuthService.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\service\CaronaService.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\service\UsuarioService.java
+C:\Users\gabri\OneDrive\Área de Trabalho\BlaBlaSinos\BlaBlaSinos\src\main\java\br\blablasinos\validation\UsuarioValidator.java

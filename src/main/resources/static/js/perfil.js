@@ -1,49 +1,53 @@
-const mockUsuario = {
+const API_PERFIL = '/api/perfil';
 
-    nome: "Jordano Rodrigues",
-    email: "jordano@edu.unisinos.br",
+window.onload = async function() {
+    const userId = localStorage.getItem('userId');
 
-    cnh: "12345678900",
-    categoria: "B",
+    if (!userId) {
+        alert("Erro: Usuário não está logado. Faça o login novamente.");
+        window.location.href = '/login.html';
+        return;
+    }
 
-    marca: "Volkswagen",
-    modelo: "Gol",
-    cor: "Branco",
-    placa: "ABC1234",
-    vagas: 4
+    document.getElementById('nome').value = localStorage.getItem('userNome') || '';
+    document.getElementById('email').value = localStorage.getItem('userEmail') || '';
+
+    try {
+        const response = await fetch(`${API_PERFIL}?id=${encodeURIComponent(userId)}`);
+        if (!response.ok) {
+            console.warn('Não foi possível carregar o perfil do usuário:', response.status);
+            return;
+        }
+
+        const usuario = await response.json();
+
+        if (usuario.cnh) {
+            document.getElementById('cnh').value = usuario.cnh;
+        }
+        if (usuario.marcaVeiculo) {
+            document.getElementById('marca').value = usuario.marcaVeiculo;
+        }
+        if (usuario.vagas !== undefined && usuario.vagas !== null) {
+            document.getElementById('vagas').value = usuario.vagas;
+        }
+        if (usuario.marcaVeiculo) {
+            document.getElementById('marca').value = usuario.marcaVeiculo;
+        }
+        if (usuario.modeloVeiculo) {
+            document.getElementById('modelo').value = usuario.modeloVeiculo;
+        }
+        if (usuario.corVeiculo) {
+            document.getElementById('cor').value = usuario.corVeiculo;
+        }
+        if (usuario.placaVeiculo) {
+            document.getElementById('placa').value = usuario.placaVeiculo;
+        }
+    } catch (error) {
+        console.error('Falha ao carregar dados do perfil:', error);
+    }
 };
 
-window.onload = function() {
-
-    document.getElementById("nome").value =
-        mockUsuario.nome;
-
-    document.getElementById("email").value =
-        mockUsuario.email;
-
-    document.getElementById("cnh").value =
-        mockUsuario.cnh;
-
-    document.getElementById("categoria").value =
-        mockUsuario.categoria;
-
-    document.getElementById("marca").value =
-        mockUsuario.marca;
-
-    document.getElementById("modelo").value =
-        mockUsuario.modelo;
-
-    document.getElementById("cor").value =
-        mockUsuario.cor;
-
-    document.getElementById("placa").value =
-        mockUsuario.placa;
-
-    document.getElementById("vagas").value =
-        mockUsuario.vagas;
-};
-
-document.getElementById('form-perfil').addEventListener('submit', async function(event) {
+document.getElementById('perfil-form').addEventListener('submit', async function(event) {
     event.preventDefault();
 
     const userId = localStorage.getItem('userId');
@@ -53,15 +57,17 @@ document.getElementById('form-perfil').addEventListener('submit', async function
         return;
     }
 
-    const dadosPerfil = {
-        id: parseInt(userId), // Envia o ID para o backend saber quem atualizar
-        nome: document.getElementById('nome').value,
-        cnh: document.getElementById('cnh').value,
-        modeloVeiculo: document.getElementById('modeloVeiculo').value,
-        corVeiculo: document.getElementById('corVeiculo').value,
-        placaVeiculo: document.getElementById('placaVeiculo').value
-        // Adicione outros campos se necessário
-    };
+        const vagasInput = document.getElementById('vagas').value;
+        const dadosPerfil = {
+            id: parseInt(userId), // Envia o ID para o backend saber quem atualizar
+            nome: document.getElementById('nome').value,
+            cnh: document.getElementById('cnh').value,
+            marcaVeiculo: document.getElementById('marca').value,
+            modeloVeiculo: document.getElementById('modelo').value,
+            corVeiculo: document.getElementById('cor').value,
+            placaVeiculo: document.getElementById('placa').value,
+            vagas: vagasInput ? parseInt(vagasInput) : null
+        };
 
     try {
         const response = await fetch('/api/perfil', {

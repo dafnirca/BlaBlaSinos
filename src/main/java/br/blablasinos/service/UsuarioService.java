@@ -1,4 +1,6 @@
 package br.blablasinos.service;
+import java.util.Optional;
+
 import br.blablasinos.exception.UsuarioValidationException;
 import br.blablasinos.model.Usuario;
 import br.blablasinos.repository.SqliteUsuarioRepository;
@@ -40,5 +42,11 @@ public class UsuarioService {
         }
         
         repository.update(usuario); 
+    }
+
+    public Optional<Usuario> buscarPorId(Long id) {
+            throw new IllegalArgumentException("ID do usuário não pode ser nulo.");
+        }
+        return repository.buscarPorId(id);
     }
 }

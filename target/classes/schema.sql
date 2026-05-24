@@ -7,9 +7,11 @@
     tentativas_falhas INTEGER NOT NULL DEFAULT 0,
     bloqueado_ate INTEGER,
     cnh TEXT,
+    marca_veiculo TEXT,
     modelo_veiculo TEXT,
     cor_veiculo TEXT,
     placa_veiculo TEXT
+    ,vagas INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS caronas (

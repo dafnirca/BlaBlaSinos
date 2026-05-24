@@ -14,6 +14,8 @@ public class Usuario {
     private String modeloVeiculo;
     private String corVeiculo;
     private String placaVeiculo;
+    private String marcaVeiculo;
+    private Integer vagas;
 
     public Usuario(Long id, String nome, String email, String senha, TipoUsuario tipo, int tentativasFalhas, Long bloqueadoAte) {
         this.id = id;
@@ -53,4 +55,8 @@ public class Usuario {
     public void setCorVeiculo(String corVeiculo) { this.corVeiculo = corVeiculo; }
     public String getPlacaVeiculo() { return placaVeiculo; }
     public void setPlacaVeiculo(String placaVeiculo) { this.placaVeiculo = placaVeiculo; }
+    public String getMarcaVeiculo() { return marcaVeiculo; }
+    public void setMarcaVeiculo(String marcaVeiculo) { this.marcaVeiculo = marcaVeiculo; }
+    public Integer getVagas() { return vagas; }
+    public void setVagas(Integer vagas) { this.vagas = vagas; }
 }

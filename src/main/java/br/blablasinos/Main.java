@@ -1,12 +1,14 @@
 package br.blablasinos;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import com.sun.net.httpserver.HttpServer;
+
 import br.blablasinos.handler.CadastroHandler;
 import br.blablasinos.handler.LoginHandler;
 import br.blablasinos.handler.PerfilHandler;
 import br.blablasinos.handler.StaticFileHandler;
-import com.sun.net.httpserver.HttpServer;
-import java.io.IOException;
-import java.net.InetSocketAddress;
 
 public class Main {
 
