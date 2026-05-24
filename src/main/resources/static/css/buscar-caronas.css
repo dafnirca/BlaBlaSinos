@@ -130,12 +130,19 @@ button:hover {
     font-style: italic;
 }
 
-@media (max-width: 900px) {
+/* @media (max-width: 900px) {
     .form-grid {
         grid-template-columns: 1fr;
     }
 
     button {
         width: 100%;
+    }
+}
+*/
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Faz os filtros ficarem um embaixo do outro */
     }
 }
