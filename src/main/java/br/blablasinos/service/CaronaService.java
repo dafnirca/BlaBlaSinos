@@ -5,9 +5,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import br.blablasinos.model.Carona;
+import br.blablasinos.model.Reserva;
 import br.blablasinos.model.TipoUsuario;
 import br.blablasinos.model.Usuario;
 import br.blablasinos.repository.CaronaRepository;
+import br.blablasinos.repository.ReservaRepository;
+import br.blablasinos.repository.SqliteReservaRepository;
+import br.blablasinos.repository.SqliteUsuarioRepository;
 import br.blablasinos.repository.UsuarioRepository;
 
 public class CaronaService {
@@ -21,10 +25,20 @@ public class CaronaService {
 
     private final CaronaRepository  caronaRepo;
     private final UsuarioRepository usuarioRepo;
+    private final ReservaRepository reservaRepo;
 
-    public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo) {
+    // Construtor para testes
+    public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo, ReservaRepository reservaRepo) {
         this.caronaRepo  = caronaRepo;
         this.usuarioRepo = usuarioRepo;
+        this.reservaRepo = reservaRepo;
+    }
+
+    // Construtor padrão que os Handlers usam
+    public CaronaService() {
+        this.caronaRepo = new CaronaRepository("jdbc:sqlite:caronas.db");
+        this.usuarioRepo = new SqliteUsuarioRepository();
+        this.reservaRepo = new SqliteReservaRepository();
     }
 
 
@@ -128,6 +142,42 @@ public class CaronaService {
         return caronaRepo.listarAtivas(destino, data);
     }
 
+    public Reserva solicitarVaga(Long passageiroId, Long caronaId) throws CaronaException, SQLException {
+        buscarUsuario(passageiroId);
+        Carona carona = caronaRepo.buscarPorId(caronaId)
+            .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
+
+        if (carona.getVagasDisponiveis() <= 0) {
+            throw new CaronaException("Não há vagas disponíveis nesta carona (RN04.1).");
+        }
+        
+        carona.setVagasDisponiveis(carona.getVagasDisponiveis() - 1);
+        caronaRepo.atualizar(carona);
+
+        Reserva novaReserva = new Reserva();
+        novaReserva.setPassageiroId(passageiroId);
+        novaReserva.setCaronaId(caronaId);
+        novaReserva.setStatus("PENDENTE");
+
+        return reservaRepo.salvar(novaReserva);
+    }
+
+    public void cancelarSolicitacao(Long passageiroId, Long reservaId) throws CaronaException, SQLException {
+        Reserva reserva = reservaRepo.buscarPorId(reservaId)
+            .orElseThrow(() -> new CaronaException("Reserva não encontrada (id=" + reservaId + ")."));
+
+        if (!reserva.getPassageiroId().equals(passageiroId)) {
+            throw new CaronaException("Você não tem permissão para cancelar esta solicitação.");
+        }
+
+        Carona carona = caronaRepo.buscarPorId(reserva.getCaronaId())
+            .orElseThrow(() -> new CaronaException("Carona associada à reserva não foi encontrada."));
+
+        carona.setVagasDisponiveis(carona.getVagasDisponiveis() + 1);
+        caronaRepo.atualizar(carona);
+
+        reservaRepo.deletar(reservaId);
+    }
 
     private void validarEdicaoPermitida(Carona carona) throws CaronaException {
         if (!LocalDateTime.now().isBefore(carona.getDataHora())) {
@@ -196,12 +246,17 @@ public class CaronaService {
     }
 
     
-    private Usuario buscarUsuario(Long id) throws CaronaException, SQLException {
+    private Usuario buscarUsuario(Long id) throws CaronaException {
         if (id == null) {
             throw new CaronaException("ID do usuário inválido.");
         }
         
-        return usuarioRepo.buscarPorEmail(id.toString())
+        // ==================================================================
+        // === ESTA É A CORREÇÃO FINAL E DEFINITIVA ===
+        // ==================================================================
+        // O código antigo estava chamando 'buscarPorEmail(id.toString())', o que estava errado.
+        // O código correto é chamar 'buscarPorId(id)'.
+        return usuarioRepo.buscarPorId(id)
             .orElseThrow(() -> new CaronaException(
                 "Usuário não encontrado (id=" + id + ")."));
     }
