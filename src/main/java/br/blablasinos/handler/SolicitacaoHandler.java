@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class SolicitacaoHandler implements HttpHandler {
 
@@ -33,6 +34,10 @@ public class SolicitacaoHandler implements HttpHandler {
         try {
             if ("POST".equals(method)) {
                 handlePost(exchange);
+            } else if ("GET".equals(method)) {
+                handleGet(exchange);
+            } else if ("PUT".equals(method)) {
+                handlePut(exchange);
             } else if ("DELETE".equals(method)) {
                 handleDelete(exchange);
             } else {
@@ -48,6 +53,34 @@ public class SolicitacaoHandler implements HttpHandler {
             SolicitacaoRequest request = gson.fromJson(reader, SolicitacaoRequest.class);
             Reserva reservaCriada = caronaService.solicitarVaga(request.getPassageiroId(), request.getCaronaId());
             sendResponse(exchange, 201, gson.toJson(reservaCriada));
+        }
+    }
+
+    private void handleGet(HttpExchange exchange) throws Exception {
+        String query = exchange.getRequestURI().getQuery();
+        long motoristaId = Long.parseLong(getParameter(query, "motoristaId"));
+        List<Reserva> reservas = caronaService.listarSolicitacoesPendentes(motoristaId);
+        sendResponse(exchange, 200, gson.toJson(reservas));
+    }
+
+    private void handlePut(HttpExchange exchange) throws Exception {
+        try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
+            DecisaoRequest request = gson.fromJson(reader, DecisaoRequest.class);
+            if (request == null || request.getMotoristaId() == null || request.getReservaId() == null || request.getAcao() == null) {
+                throw new IllegalArgumentException("motoristaId, reservaId e acao sao obrigatorios.");
+            }
+
+            boolean aceitar;
+            if ("ACEITAR".equalsIgnoreCase(request.getAcao())) {
+                aceitar = true;
+            } else if ("RECUSAR".equalsIgnoreCase(request.getAcao()) || "REJEITAR".equalsIgnoreCase(request.getAcao())) {
+                aceitar = false;
+            } else {
+                throw new IllegalArgumentException("Acao invalida. Use ACEITAR ou RECUSAR.");
+            }
+
+            Reserva reservaAtualizada = caronaService.decidirSolicitacao(request.getMotoristaId(), request.getReservaId(), aceitar);
+            sendResponse(exchange, 200, gson.toJson(reservaAtualizada));
         }
     }
 
@@ -82,5 +115,14 @@ public class SolicitacaoHandler implements HttpHandler {
         private Long caronaId;
         public Long getPassageiroId() { return passageiroId; }
         public Long getCaronaId() { return caronaId; }
+    }
+
+    private static class DecisaoRequest {
+        private Long motoristaId;
+        private Long reservaId;
+        private String acao;
+        public Long getMotoristaId() { return motoristaId; }
+        public Long getReservaId() { return reservaId; }
+        public String getAcao() { return acao; }
     }
 }

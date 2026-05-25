@@ -81,7 +81,13 @@ class CaronaServiceTest {
         private long nextId = 1;
         @Override public Reserva salvar(Reserva r) { r.setId(nextId++); db.put(r.getId(), r); return r; }
         @Override public Optional<Reserva> buscarPorId(long id) { return Optional.ofNullable(db.get(id)); }
+        @Override public void update(Reserva reserva) { db.put(reserva.getId(), reserva); }
         @Override public void deletar(long id) { db.remove(id); }
+        @Override public List<Reserva> listarPendentesPorMotorista(long motoristaId) {
+            return db.values().stream()
+                .filter(r -> "PENDENTE".equals(r.getStatus()))
+                .collect(Collectors.toList());
+        }
     }
 
     static class InMemoryUsuarioRepository implements UsuarioRepository {
