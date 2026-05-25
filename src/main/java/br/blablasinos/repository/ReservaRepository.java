@@ -10,4 +10,5 @@ public interface ReservaRepository {
     void update(Reserva reserva);
     void deletar(long id);
     List<Reserva> listarPendentesPorMotorista(long motoristaId);
+    List<Reserva> listarPorPassageiro(long passageiroId);
 }

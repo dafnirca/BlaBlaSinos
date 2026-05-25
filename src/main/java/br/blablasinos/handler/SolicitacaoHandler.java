@@ -58,8 +58,28 @@ public class SolicitacaoHandler implements HttpHandler {
 
     private void handleGet(HttpExchange exchange) throws Exception {
         String query = exchange.getRequestURI().getQuery();
-        long motoristaId = Long.parseLong(getParameter(query, "motoristaId"));
-        List<Reserva> reservas = caronaService.listarSolicitacoesPendentes(motoristaId);
+        List<Reserva> reservas;
+        
+        try {
+            // Tenta obter motoristaId para listar solicitações pendentes
+            String motoristaIdStr = getParameterOptional(query, "motoristaId");
+            if (motoristaIdStr != null) {
+                long motoristaId = Long.parseLong(motoristaIdStr);
+                reservas = caronaService.listarSolicitacoesPendentes(motoristaId);
+            } else {
+                // Tenta obter passageiroId para listar solicitações do passageiro
+                String passageiroIdStr = getParameterOptional(query, "passageiroId");
+                if (passageiroIdStr != null) {
+                    long passageiroId = Long.parseLong(passageiroIdStr);
+                    reservas = caronaService.listarSolicitacoesDoPassageiro(passageiroId);
+                } else {
+                    throw new IllegalArgumentException("Forneça motoristaId ou passageiroId como parâmetro.");
+                }
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("IDs devem ser números válidos.");
+        }
+        
         sendResponse(exchange, 200, gson.toJson(reservas));
     }
 
@@ -99,6 +119,15 @@ public class SolicitacaoHandler implements HttpHandler {
             if (pair.length > 1 && pair[0].equals(paramName)) return pair[1];
         }
         throw new IllegalArgumentException("Parametro obrigatorio nao encontrado: " + paramName);
+    }
+
+    private String getParameterOptional(String query, String paramName) {
+        if (query == null) return null;
+        for (String param : query.split("&")) {
+            String[] pair = param.split("=");
+            if (pair.length > 1 && pair[0].equals(paramName)) return pair[1];
+        }
+        return null;
     }
 
     private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {

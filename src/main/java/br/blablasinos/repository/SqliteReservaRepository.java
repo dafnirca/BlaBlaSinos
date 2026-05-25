@@ -149,4 +149,28 @@ public class SqliteReservaRepository implements ReservaRepository {
             throw new RuntimeException("Falha ao deletar a reserva.", e);
         }
     }
+
+    @Override
+    public List<Reserva> listarPorPassageiro(long passageiroId) {
+        String sql = "SELECT * FROM reservas WHERE passageiro_id = ? ORDER BY id DESC";
+        try (Connection conn = criarConexao();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, passageiroId);
+            ResultSet rs = pstmt.executeQuery();
+
+            java.util.List<Reserva> reservas = new java.util.ArrayList<>();
+            while (rs.next()) {
+                Reserva reserva = new Reserva(
+                    rs.getLong("id"),
+                    rs.getLong("carona_id"),
+                    rs.getLong("passageiro_id"),
+                    rs.getString("status")
+                );
+                reservas.add(reserva);
+            }
+            return reservas;
+        } catch (SQLException e) {
+            throw new RuntimeException("Falha ao listar reservas do passageiro.", e);
+        }
+    }
 }

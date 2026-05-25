@@ -88,6 +88,11 @@ class CaronaServiceTest {
                 .filter(r -> "PENDENTE".equals(r.getStatus()))
                 .collect(Collectors.toList());
         }
+        @Override public List<Reserva> listarPorPassageiro(long passageiroId) {
+            return db.values().stream()
+                .filter(r -> r.getPassageiroId() == passageiroId)
+                .collect(Collectors.toList());
+        }
     }
 
     static class InMemoryUsuarioRepository implements UsuarioRepository {

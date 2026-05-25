@@ -65,8 +65,15 @@ public class CaronaHandler implements HttpHandler {
     private void handleGetMinhasCaronas(HttpExchange exchange) throws Exception {
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> params = parseQuery(query);
+        // Se 'id' for fornecido, retorna a carona específica
+        if (params.containsKey("id") && params.get("id") != null && !params.get("id").isBlank()) {
+            long id = Long.parseLong(params.get("id"));
+            Carona carona = caronaService.buscarCaronaPorId(id);
+            sendResponse(exchange, 200, gson.toJson(carona));
+            return;
+        }
+
         long motoristaId = Long.parseLong(params.get("motoristaId"));
-        
         List<Carona> caronas = caronaService.listarMinhasCaronas(motoristaId);
         sendResponse(exchange, 200, gson.toJson(caronas));
     }

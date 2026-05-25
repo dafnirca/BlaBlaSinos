@@ -10,20 +10,76 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Elementos do DOM ---
     const btnSolicitar = document.getElementById('btn-solicitar');
-    const statusAguardando = document.getElementById('status-aguardando');
+    const statusResultado = document.getElementById('status-resultado');
+    const statusText = document.getElementById('status-text');
     const btnCancelar = document.getElementById('btn-cancelar');
 
-    // --- Lógica para buscar e preencher os dados da carona ---
-    // (Esta parte depende de um endpoint que retorne os detalhes de uma carona)
-    // Por agora, usaremos dados mockados como exemplo:
-    const caronaMock = { id: caronaId, motorista: "Camila Souza", origem: "Campus Unisinos", destino: "Centro Histórico", dataHora: "2026-05-20T08:15:00", vagas: "2/3" };
-    document.getElementById('motorista-nome').textContent = caronaMock.motorista;
-    document.getElementById('carona-origem').textContent = caronaMock.origem;
-    document.getElementById('carona-destino').textContent = caronaMock.destino;
-    document.getElementById('carona-datahora').textContent = new Date(caronaMock.dataHora).toLocaleString('pt-BR');
-    document.getElementById('carona-vagas').textContent = caronaMock.vagas;
+    // --- Busca e preenche os dados reais da carona e do motorista ---
+    async function carregarDetalhesCarona() {
+        try {
+            const resp = await fetch(`/api/caronas?id=${encodeURIComponent(caronaId)}`);
+            if (!resp.ok) throw new Error('Falha ao carregar detalhes da carona');
+            const carona = await resp.json();
 
-    // --- Funções de Ação ---
+            document.getElementById('carona-origem').textContent = carona.origem || 'N/A';
+            document.getElementById('carona-destino').textContent = carona.destino || 'N/A';
+            document.getElementById('carona-datahora').textContent = carona.dataHora ? new Date(carona.dataHora).toLocaleString('pt-BR') : 'N/A';
+            document.getElementById('carona-vagas').textContent = `${carona.vagasDisponiveis}/${carona.vagasTotais}`;
+
+            // Busca dados do motorista
+            try {
+                const respUser = await fetch(`/api/perfil?id=${encodeURIComponent(carona.motoristaId)}`);
+                if (respUser.ok) {
+                    const usuario = await respUser.json();
+                    document.getElementById('motorista-nome').textContent = usuario.nome || 'Motorista';
+                } else {
+                    document.getElementById('motorista-nome').textContent = 'Motorista';
+                }
+            } catch (err) {
+                console.error('Erro ao carregar motorista:', err);
+                document.getElementById('motorista-nome').textContent = 'Motorista';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar detalhes da carona:', error);
+        }
+    }
+
+    async function carregarStatusReserva() {
+        const passageiroId = localStorage.getItem('userId');
+        if (!passageiroId) return;
+
+        try {
+            const response = await fetch(`/api/solicitacoes?passageiroId=${encodeURIComponent(passageiroId)}`);
+            if (!response.ok) return;
+            const reservas = await response.json();
+            const reservaExistente = reservas.find(r => String(r.caronaId) === String(caronaId));
+
+            if (reservaExistente) {
+                reservaId = reservaExistente.id;
+                atualizarStatus(reservaExistente.status);
+            }
+        } catch (error) {
+            console.error('Falha ao carregar status da reserva:', error);
+        }
+    }
+
+    function atualizarStatus(status) {
+        statusResultado.style.display = 'block';
+        statusText.textContent = {
+            'PENDENTE': 'Sua solicitação está pendente. Aguardando resposta do motorista.',
+            'CONFIRMADA': 'Solicitação aceita! Parabéns, sua vaga foi confirmada.',
+            'CANCELADA': 'Solicitação recusada pelo motorista.'
+        }[status] || `Status da solicitação: ${status}`;
+
+        if (status === 'PENDENTE') {
+            btnCancelar.style.display = 'inline-block';
+            btnSolicitar.style.display = 'none';
+        } else {
+            btnCancelar.style.display = 'none';
+            btnSolicitar.style.display = 'none';
+        }
+    }
+
     const solicitarVaga = async () => {
         const passageiroId = localStorage.getItem('userId');
         if (!passageiroId) {
@@ -35,15 +91,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/api/solicitacoes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ caronaId: parseInt(caronaId), passageiroId: parseInt(passageiroId), status: 'PENDENTE' })
+                body: JSON.stringify({ caronaId: parseInt(caronaId), passageiroId: parseInt(passageiroId) })
             });
             const result = await response.json();
 
             if (response.ok) {
                 alert("Solicitação enviada com sucesso!");
-                reservaId = result.id; // Salva o ID da reserva criada
-                btnSolicitar.style.display = 'none';
-                statusAguardando.style.display = 'block';
+                reservaId = result.id;
+                atualizarStatus(result.status);
             } else {
                 throw new Error(result.error);
             }
@@ -76,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const result = await response.json();
                 alert(result.message); // "Sua solicitação foi cancelada."
                 btnSolicitar.style.display = 'block';
-                statusAguardando.style.display = 'none';
+                statusResultado.style.display = 'none';
                 reservaId = null;
             } else {
                 const result = await response.json();
@@ -90,4 +145,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Event Listeners ---
     btnSolicitar.addEventListener('click', solicitarVaga);
     btnCancelar.addEventListener('click', cancelarSolicitacao);
+
+    // Carrega dados da carona e do motorista, depois o status da reserva
+    await carregarDetalhesCarona();
+    carregarStatusReserva();
 });

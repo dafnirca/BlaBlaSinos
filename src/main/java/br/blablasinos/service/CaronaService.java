@@ -163,6 +163,15 @@ public class CaronaService {
         return reservaRepo.listarPendentesPorMotorista(motoristaId);
     }
 
+    public List<Reserva> listarSolicitacoesDoPassageiro(Long passageiroId) throws SQLException {
+        return reservaRepo.listarPorPassageiro(passageiroId);
+    }
+
+    public Carona buscarCaronaPorId(Long caronaId) throws CaronaException, SQLException {
+        return caronaRepo.buscarPorId(caronaId)
+                .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
+    }
+
     public Reserva decidirSolicitacao(Long motoristaId, Long reservaId, boolean aceitar)
             throws CaronaException, SQLException {
         Reserva reserva = reservaRepo.buscarPorId(reservaId)
