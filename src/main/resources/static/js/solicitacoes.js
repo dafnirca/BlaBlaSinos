@@ -18,11 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnLogout = document.getElementById('btn-logout');
 
     let decisioPendente = null;
-<<<<<<< HEAD
     let pendingSolicitacoesCache = new Set();
     let firstLoad = true;
-=======
->>>>>>> origin/develop
 
     // Logout
     btnLogout.addEventListener('click', (e) => {
@@ -143,12 +140,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-<<<<<<< HEAD
     function showNotification(title, message) {
         let container = document.getElementById('toast-container');
         if (!container) {
             container = document.createElement('div');
             container.id = 'toast-container';
+            container.className = 'toast-container';
             document.body.appendChild(container);
         }
 
@@ -161,9 +158,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => toast.classList.remove('visible'), 5000);
         setTimeout(() => toast.remove(), 5600);
     }
-
-=======
->>>>>>> origin/develop
     // Recarrega a cada 10 segundos
     carregarSolicitacoes();
     setInterval(carregarSolicitacoes, 10000);

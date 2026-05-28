@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statusResultado = document.getElementById('status-resultado');
     const statusText = document.getElementById('status-text');
     const btnCancelar = document.getElementById('btn-cancelar');
+    let previousStatus = null;
+    let firstStatusLoad = true;
 
     // --- Busca e preenche os dados reais da carona e do motorista ---
     async function carregarDetalhesCarona() {
@@ -56,7 +58,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (reservaExistente) {
                 reservaId = reservaExistente.id;
-<<<<<<< HEAD
                 if (!firstStatusLoad && previousStatus && previousStatus !== reservaExistente.status) {
                     if (!window.__BlaBlaSinosNotificationSystem) {
                         if (reservaExistente.status === 'CONFIRMADA') {
@@ -67,17 +68,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
                 previousStatus = reservaExistente.status;
-=======
->>>>>>> origin/develop
                 atualizarStatus(reservaExistente.status);
             }
         } catch (error) {
             console.error('Falha ao carregar status da reserva:', error);
-<<<<<<< HEAD
         } finally {
             firstStatusLoad = false;
-=======
->>>>>>> origin/develop
         }
     }
 
@@ -98,12 +94,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-<<<<<<< HEAD
     function showNotification(title, message) {
         let container = document.getElementById('toast-container');
         if (!container) {
             container = document.createElement('div');
             container.id = 'toast-container';
+            container.className = 'toast-container';
             document.body.appendChild(container);
         }
 
@@ -117,8 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => toast.remove(), 5600);
     }
 
-=======
->>>>>>> origin/develop
     const solicitarVaga = async () => {
         const passageiroId = localStorage.getItem('userId');
         if (!passageiroId) {
@@ -187,10 +181,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Carrega dados da carona e do motorista, depois o status da reserva
     await carregarDetalhesCarona();
-<<<<<<< HEAD
     await carregarStatusReserva();
     setInterval(carregarStatusReserva, 5000);
-=======
-    carregarStatusReserva();
->>>>>>> origin/develop
 });
