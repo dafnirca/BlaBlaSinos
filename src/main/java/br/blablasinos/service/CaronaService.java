@@ -150,9 +150,6 @@ public class CaronaService {
         if (carona.getVagasDisponiveis() <= 0) {
             throw new CaronaException("Não há vagas disponíveis nesta carona (RN04.1).");
         }
-        
-        carona.setVagasDisponiveis(carona.getVagasDisponiveis() - 1);
-        caronaRepo.atualizar(carona);
 
         Reserva novaReserva = new Reserva();
         novaReserva.setPassageiroId(passageiroId);
@@ -160,6 +157,45 @@ public class CaronaService {
         novaReserva.setStatus("PENDENTE");
 
         return reservaRepo.salvar(novaReserva);
+    }
+
+    public List<Reserva> listarSolicitacoesPendentes(Long motoristaId) throws SQLException {
+        return reservaRepo.listarPendentesPorMotorista(motoristaId);
+    }
+
+    public List<Reserva> listarSolicitacoesDoPassageiro(Long passageiroId) throws SQLException {
+        return reservaRepo.listarPorPassageiro(passageiroId);
+    }
+
+    public Carona buscarCaronaPorId(Long caronaId) throws CaronaException, SQLException {
+        return caronaRepo.buscarPorId(caronaId)
+                .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
+    }
+
+    public Reserva decidirSolicitacao(Long motoristaId, Long reservaId, boolean aceitar)
+            throws CaronaException, SQLException {
+        Reserva reserva = reservaRepo.buscarPorId(reservaId)
+            .orElseThrow(() -> new CaronaException("Reserva não encontrada (id=" + reservaId + ")."));
+
+        Carona carona = buscarCaronaDoMotorista(motoristaId, reserva.getCaronaId());
+
+        if (!"PENDENTE".equals(reserva.getStatus())) {
+            throw new CaronaException("Esta solicitação já foi decidida.");
+        }
+
+        if (aceitar) {
+            if (carona.getVagasDisponiveis() <= 0) {
+                throw new CaronaException("Não há vagas disponíveis para confirmar esta solicitação.");
+            }
+            carona.setVagasDisponiveis(carona.getVagasDisponiveis() - 1);
+            caronaRepo.atualizar(carona);
+            reserva.setStatus("CONFIRMADA");
+        } else {
+            reserva.setStatus("CANCELADA");
+        }
+
+        reservaRepo.update(reserva);
+        return reserva;
     }
 
     public void cancelarSolicitacao(Long passageiroId, Long reservaId) throws CaronaException, SQLException {
@@ -170,11 +206,13 @@ public class CaronaService {
             throw new CaronaException("Você não tem permissão para cancelar esta solicitação.");
         }
 
-        Carona carona = caronaRepo.buscarPorId(reserva.getCaronaId())
-            .orElseThrow(() -> new CaronaException("Carona associada à reserva não foi encontrada."));
+        if ("CONFIRMADA".equals(reserva.getStatus())) {
+            Carona carona = caronaRepo.buscarPorId(reserva.getCaronaId())
+                .orElseThrow(() -> new CaronaException("Carona associada à reserva não foi encontrada."));
 
-        carona.setVagasDisponiveis(carona.getVagasDisponiveis() + 1);
-        caronaRepo.atualizar(carona);
+            carona.setVagasDisponiveis(carona.getVagasDisponiveis() + 1);
+            caronaRepo.atualizar(carona);
+        }
 
         reservaRepo.deletar(reservaId);
     }

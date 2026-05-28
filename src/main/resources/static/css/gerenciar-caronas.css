@@ -24,6 +24,28 @@ h1 {
     margin-bottom: 8px;
 }
 
+.nav-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.btn-nav {
+    padding: 10px 20px;
+    background-color: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.btn-nav:hover {
+    background-color: #5568d3;
+}
+
 .card {
     background: white;
     padding: 28px;
