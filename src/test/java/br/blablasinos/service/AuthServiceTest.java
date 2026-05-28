@@ -137,5 +137,15 @@ public class AuthServiceTest {
 
         @Override
         public void update(Usuario usuario) {}
+
+        @Override
+        public Optional<Usuario> buscarPorId(Long id) {
+            if (id == null) {
+                return Optional.empty();
+            }
+            return usuarios.values().stream()
+                .filter(usuario -> id.equals(usuario.getId()))
+                .findFirst();
+        }
     }
 }

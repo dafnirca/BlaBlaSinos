@@ -1,181 +1,114 @@
 package br.blablasinos.handler;
 
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.List;
-
 import br.blablasinos.model.Carona;
 import br.blablasinos.service.CaronaService;
-import br.blablasinos.service.CaronaService.CaronaException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-
-public class CaronaHandler {
-
-    private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter FMT_HORA = DateTimeFormatter.ofPattern("HH:mm");
+public class CaronaHandler implements HttpHandler {
 
     private final CaronaService caronaService;
+    private final Gson gson;
 
-    private Long motoristaIdSessao;
-
-    public CaronaHandler(CaronaService caronaService) {
-        this.caronaService = caronaService;
+    public CaronaHandler() {
+        this.caronaService = new CaronaService();
+        this.gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
     }
 
-
-    public void iniciarSessao(Long motoristaId) {
-        this.motoristaIdSessao = motoristaId;
-    }
-
-    public void encerrarSessao() {
-        this.motoristaIdSessao = null;
-    }
-
-
-    public ResultadoOperacao<Carona> cadastrarCarona(String origemRaw,
-                                                     String destinoRaw,
-                                                     String dataRaw,
-                                                     String horaRaw,
-                                                     String vagasRaw,
-                                                     String observacoesRaw) {
-        if (motoristaIdSessao == null) {
-            return ResultadoOperacao.falha("Nenhum usuário autenticado. Faça login novamente.");
-        }
-
-        LocalDateTime horarioSaida;
-        int vagas;
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        String method = exchange.getRequestMethod();
+        String path = exchange.getRequestURI().getPath();
 
         try {
-            LocalDate data = LocalDate.parse(dataRaw.trim(), FMT_DATA);
-            LocalTime hora = LocalTime.parse(horaRaw.trim(), FMT_HORA);
-            horarioSaida = LocalDateTime.of(data, hora);
-        } catch (DateTimeParseException e) {
-            return ResultadoOperacao.falha(
-                "Data ou hora inválida. Use o formato DD/MM/AAAA para data e HH:MM para hora.");
-        }
-
-        try {
-            vagas = Integer.parseInt(vagasRaw.trim());
-        } catch (NumberFormatException e) {
-            return ResultadoOperacao.falha("Número de vagas inválido. Informe um valor entre 1 e 4.");
-        }
-
-        try {
-            Carona carona = caronaService.cadastrarCarona(
-                motoristaIdSessao,
-                origemRaw,
-                destinoRaw,
-                horarioSaida,
-                vagas
-            );
-            return ResultadoOperacao.sucesso(
-                "Carona cadastrada com sucesso! (id: " + carona.getId() + ")",
-                carona
-            );
-
-        } catch (CaronaException | IllegalArgumentException e) {
-            return ResultadoOperacao.falha(e.getMessage());
-
-        } catch (SQLException e) {
-            return ResultadoOperacao.falha(
-                "Erro ao salvar a carona. Tente novamente ou contate o suporte.");
-        }
-    }
-
-
-    public ResultadoOperacao<Void> cancelarCarona(String caronaIdRaw) {
-        if (motoristaIdSessao == null) {
-            return ResultadoOperacao.falha("Nenhum usuário autenticado. Faça login novamente.");
-        }
-
-        long caronaId;
-        try {
-            caronaId = Long.parseLong(caronaIdRaw.trim());
-        } catch (NumberFormatException e) {
-            return ResultadoOperacao.falha("Identificador de carona inválido.");
-        }
-
-        try {
-            caronaService.cancelarCarona(motoristaIdSessao, caronaId);
-            return ResultadoOperacao.sucesso("Carona cancelada com sucesso.", null);
-
-        } catch (CaronaException e) {
-            return ResultadoOperacao.falha(e.getMessage());
-        } catch (SQLException e) {
-            return ResultadoOperacao.falha("Erro ao cancelar a carona. Tente novamente.");
-        }
-    }
-
-
-    public ResultadoOperacao<List<Carona>> listarMinhasCaronas() {
-        if (motoristaIdSessao == null) {
-            return ResultadoOperacao.falha("Nenhum usuário autenticado.");
-        }
-        try {
-            List<Carona> caronas = caronaService.listarMinhasCaronas(motoristaIdSessao);
-            return ResultadoOperacao.sucesso("OK", caronas);
-        } catch (SQLException e) {
-            return ResultadoOperacao.falha("Erro ao carregar suas caronas. Tente novamente.");
-        }
-    }
-
-    public ResultadoOperacao<List<Carona>> buscarCaronas(String destinoRaw, String dataRaw) {
-        String destino = (destinoRaw != null && !destinoRaw.isBlank()) ? destinoRaw.trim() : null;
-        String data    = null;
-
-        if (dataRaw != null && !dataRaw.isBlank()) {
-            try {
-                LocalDate d = LocalDate.parse(dataRaw.trim(), FMT_DATA);
-                data = d.toString();  
-            } catch (DateTimeParseException e) {
-                return ResultadoOperacao.falha(
-                    "Data inválida. Use o formato DD/MM/AAAA.");
+            // Roteamento baseado no caminho e no método
+            if ("/api/caronas/buscar".equals(path) && "GET".equals(method)) {
+                handleSearch(exchange); // Rota para busca de passageiros
+            } else if ("/api/caronas".equals(path) && "GET".equals(method)) {
+                handleGetMinhasCaronas(exchange); // Rota para listar caronas do motorista
+            } else if ("/api/caronas".equals(path) && "POST".equals(method)) {
+                handlePost(exchange); // Rota para criar uma nova carona
+            } else {
+                sendResponse(exchange, 404, "{\"error\": \"Rota nao encontrada\"}");
             }
-        }
-
-        try {
-            List<Carona> caronas = caronaService.buscarCaronasDisponiveis(destino, data);
-            String msg = caronas.isEmpty()
-                ? "Nenhuma carona disponível para os filtros informados."
-                : caronas.size() + " carona(s) encontrada(s).";
-            return ResultadoOperacao.sucesso(msg, caronas);
-        } catch (SQLException e) {
-            return ResultadoOperacao.falha("Erro ao buscar caronas. Tente novamente.");
+        } catch (Exception e) {
+            sendResponse(exchange, 400, "{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
+    // NOVO MÉTODO: Lida com a busca de caronas por passageiros
+    private void handleSearch(HttpExchange exchange) throws Exception {
+        String query = exchange.getRequestURI().getQuery();
+        Map<String, String> params = parseQuery(query);
+        
+        String destino = params.get("destino");
+        String data = params.get("data");
 
-    public static class ResultadoOperacao<T> {
+        List<Carona> caronas = caronaService.buscarCaronasDisponiveis(destino, data);
+        sendResponse(exchange, 200, gson.toJson(caronas));
+    }
 
-        private final boolean sucesso;
-        private final String  mensagem;
-        private final T       dado;
-
-        private ResultadoOperacao(boolean sucesso, String mensagem, T dado) {
-            this.sucesso  = sucesso;
-            this.mensagem = mensagem;
-            this.dado     = dado;
+    // MÉTODO RENOMEADO: Lida com a listagem de caronas de um motorista
+    private void handleGetMinhasCaronas(HttpExchange exchange) throws Exception {
+        String query = exchange.getRequestURI().getQuery();
+        Map<String, String> params = parseQuery(query);
+        // Se 'id' for fornecido, retorna a carona específica
+        if (params.containsKey("id") && params.get("id") != null && !params.get("id").isBlank()) {
+            long id = Long.parseLong(params.get("id"));
+            Carona carona = caronaService.buscarCaronaPorId(id);
+            sendResponse(exchange, 200, gson.toJson(carona));
+            return;
         }
 
-        public static <T> ResultadoOperacao<T> sucesso(String message, T data) {
-            return new ResultadoOperacao<>(true, message, data);
-        }
+        long motoristaId = Long.parseLong(params.get("motoristaId"));
+        List<Carona> caronas = caronaService.listarMinhasCaronas(motoristaId);
+        sendResponse(exchange, 200, gson.toJson(caronas));
+    }
 
-        public static <T> ResultadoOperacao<T> falha(String message) {
-            return new ResultadoOperacao<>(false, message, null);
+    // Lida com a criação de uma nova carona
+    private void handlePost(HttpExchange exchange) throws Exception {
+        try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
+            Carona carona = gson.fromJson(reader, Carona.class);
+            Carona caronaCadastrada = caronaService.cadastrarCarona(
+                carona.getMotoristaId(),
+                carona.getOrigem(),
+                carona.getDestino(),
+                carona.getDataHora(),
+                carona.getVagasTotais()
+            );
+            sendResponse(exchange, 201, gson.toJson(caronaCadastrada));
         }
+    }
 
-        public boolean isSucesso()  { return sucesso; }
-        public String  getMensagem(){ return mensagem; }
-        public T       getDado()    { return dado; }
-
-        @Override
-        public String toString() {
-            return (sucesso ? "[OK] " : "[ERRO] ") + mensagem;
+    private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(statusCode, responseBytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseBytes);
         }
+    }
+
+    // Método auxiliar para extrair parâmetros da URL
+    private Map<String, String> parseQuery(String query) {
+        if (query == null) {
+            return Map.of();
+        }
+        return Stream.of(query.split("&"))
+            .map(s -> s.split("=", 2))
+            .collect(Collectors.toMap(a -> a[0], a -> a.length > 1 ? a[1] : ""));
     }
 }

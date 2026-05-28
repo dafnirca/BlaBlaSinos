@@ -125,6 +125,17 @@ public class UsuarioServiceTest {
         }
 
         @Override
+        public Optional<Usuario> buscarPorId(Long id) {
+            if (id == null) {
+                return Optional.empty();
+            }
+            return usuariosPorEmail.values()
+                .stream()
+                .filter(usuario -> id.equals(usuario.getId()))
+                .findFirst();
+        }
+
+        @Override
         public void atualizarStatusDeBloqueio(String email, int tentativasFalhas, Long bloqueadoAte) {
             Optional<Usuario> usuarioSalvo = buscarPorEmail(email);
             if (usuarioSalvo.isPresent()) {

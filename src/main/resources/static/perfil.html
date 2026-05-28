@@ -1,121 +1,69 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlaBlaSinos - Perfil</title>
     <link rel="stylesheet" href="css/perfil.css">
-    <link rel="stylesheet" href="css/notifications.css">
 </head>
-
 <body>
-
     <div class="perfil-container">
-
         <h1>Meu Perfil</h1>
-
         <form id="perfil-form">
-
             <div class="card">
-
                 <h2>Dados pessoais</h2>
-
                 <div class="input-group">
-                    <label>Nome</label>
-                    <input type="text" id="nome">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" required>
                 </div>
-
                 <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="email">
+                    <label for="email">Email (não pode ser alterado)</label>
+                    <input type="email" id="email" disabled>
                 </div>
-
             </div>
 
             <div class="card">
-
-                <h2>CNH</h2>
-
-                <div class="input-group">
-                    <label>Número da CNH</label>
-                    <input type="text" id="cnh">
+                <h2>Perfil de Motorista</h2>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="sou-motorista-checkbox">
+                    Quero ser motorista e oferecer caronas
+                </label>
+                <div id="motorista-fields" class="hidden">
+                    <p class="info-text">Preencha seus dados de CNH e veículo para começar a oferecer caronas.</p>
+                    <div class="input-group">
+                        <label for="cnh">Número da CNH</label>
+                        <input type="text" id="cnh">
+                    </div>
+                    <div class="input-group">
+                        <label for="modelo">Modelo do Veículo</label>
+                        <input type="text" id="modelo">
+                    </div>
+                    <div class="input-group">
+                        <label for="cor">Cor</label>
+                        <input type="text" id="cor">
+                    </div>
+                    <div class="input-group">
+                        <label for="placa">Placa</label>
+                        <input type="text" id="placa">
+                    </div>
                 </div>
-
-                <div class="input-group">
-                    <label>Categoria</label>
-
-                    <select id="categoria">
-                        <option>A</option>
-                        <option>B</option>
-                        <option>C</option>
-                        <option>D</option>
-                        <option>E</option>
-                    </select>
-                </div>
-
             </div>
 
-            <div class="card">
-
-                <h2>Veículo</h2>
-
-                <div class="input-group">
-                    <label>Marca</label>
-                    <input type="text" id="marca">
-                </div>
-
-                <div class="input-group">
-                    <label>Modelo</label>
-                    <input type="text" id="modelo">
-                </div>
-
-                <div class="input-group">
-                    <label>Cor</label>
-                    <input type="text" id="cor">
-                </div>
-
-                <div class="input-group">
-                    <label>Placa</label>
-                    <input type="text" id="placa">
-                </div>
-
-                <div class="input-group">
-                    <label>Vagas</label>
-                    <input
-                        type="number"
-                        id="vagas"
-                        min="1"
-                        max="8"
-                    >
-                </div>
-
+            <button type="submit">Salvar Alterações</button>
+            <div class="actions-container">
+                <a href="buscar-caronas.html" class="action-link">Buscar caronas</a>
+                <a id="link-minhas-caronas" href="gerenciar-caronas.html" class="action-link hidden">Gerenciar minhas caronas</a>
             </div>
-
-            <button type="submit">
-                Salvar Alterações
-            </button>
-
-            <div class="secondary-action">
-                <a href="buscar-caronas.html">Buscar caronas</a>
-            </div>
-
         </form>
-
     </div>
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 
 =======
     <script src="js/notifications.js"></script>
 >>>>>>> Stashed changes
+=======
+>>>>>>> origin/develop
     <script src="js/perfil.js"></script>
-
 </body>
-
 </html>

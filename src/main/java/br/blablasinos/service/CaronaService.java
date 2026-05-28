@@ -5,9 +5,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import br.blablasinos.model.Carona;
+import br.blablasinos.model.Reserva;
 import br.blablasinos.model.TipoUsuario;
 import br.blablasinos.model.Usuario;
 import br.blablasinos.repository.CaronaRepository;
+import br.blablasinos.repository.ReservaRepository;
+import br.blablasinos.repository.SqliteReservaRepository;
+import br.blablasinos.repository.SqliteUsuarioRepository;
 import br.blablasinos.repository.UsuarioRepository;
 
 public class CaronaService {
@@ -21,10 +25,20 @@ public class CaronaService {
 
     private final CaronaRepository  caronaRepo;
     private final UsuarioRepository usuarioRepo;
+    private final ReservaRepository reservaRepo;
 
-    public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo) {
+    // Construtor para testes
+    public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo, ReservaRepository reservaRepo) {
         this.caronaRepo  = caronaRepo;
         this.usuarioRepo = usuarioRepo;
+        this.reservaRepo = reservaRepo;
+    }
+
+    // Construtor padrão que os Handlers usam
+    public CaronaService() {
+        this.caronaRepo = new CaronaRepository("jdbc:sqlite:caronas.db");
+        this.usuarioRepo = new SqliteUsuarioRepository();
+        this.reservaRepo = new SqliteReservaRepository();
     }
 
 
@@ -128,6 +142,80 @@ public class CaronaService {
         return caronaRepo.listarAtivas(destino, data);
     }
 
+    public Reserva solicitarVaga(Long passageiroId, Long caronaId) throws CaronaException, SQLException {
+        buscarUsuario(passageiroId);
+        Carona carona = caronaRepo.buscarPorId(caronaId)
+            .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
+
+        if (carona.getVagasDisponiveis() <= 0) {
+            throw new CaronaException("Não há vagas disponíveis nesta carona (RN04.1).");
+        }
+
+        Reserva novaReserva = new Reserva();
+        novaReserva.setPassageiroId(passageiroId);
+        novaReserva.setCaronaId(caronaId);
+        novaReserva.setStatus("PENDENTE");
+
+        return reservaRepo.salvar(novaReserva);
+    }
+
+    public List<Reserva> listarSolicitacoesPendentes(Long motoristaId) throws SQLException {
+        return reservaRepo.listarPendentesPorMotorista(motoristaId);
+    }
+
+    public List<Reserva> listarSolicitacoesDoPassageiro(Long passageiroId) throws SQLException {
+        return reservaRepo.listarPorPassageiro(passageiroId);
+    }
+
+    public Carona buscarCaronaPorId(Long caronaId) throws CaronaException, SQLException {
+        return caronaRepo.buscarPorId(caronaId)
+                .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
+    }
+
+    public Reserva decidirSolicitacao(Long motoristaId, Long reservaId, boolean aceitar)
+            throws CaronaException, SQLException {
+        Reserva reserva = reservaRepo.buscarPorId(reservaId)
+            .orElseThrow(() -> new CaronaException("Reserva não encontrada (id=" + reservaId + ")."));
+
+        Carona carona = buscarCaronaDoMotorista(motoristaId, reserva.getCaronaId());
+
+        if (!"PENDENTE".equals(reserva.getStatus())) {
+            throw new CaronaException("Esta solicitação já foi decidida.");
+        }
+
+        if (aceitar) {
+            if (carona.getVagasDisponiveis() <= 0) {
+                throw new CaronaException("Não há vagas disponíveis para confirmar esta solicitação.");
+            }
+            carona.setVagasDisponiveis(carona.getVagasDisponiveis() - 1);
+            caronaRepo.atualizar(carona);
+            reserva.setStatus("CONFIRMADA");
+        } else {
+            reserva.setStatus("CANCELADA");
+        }
+
+        reservaRepo.update(reserva);
+        return reserva;
+    }
+
+    public void cancelarSolicitacao(Long passageiroId, Long reservaId) throws CaronaException, SQLException {
+        Reserva reserva = reservaRepo.buscarPorId(reservaId)
+            .orElseThrow(() -> new CaronaException("Reserva não encontrada (id=" + reservaId + ")."));
+
+        if (!reserva.getPassageiroId().equals(passageiroId)) {
+            throw new CaronaException("Você não tem permissão para cancelar esta solicitação.");
+        }
+
+        if ("CONFIRMADA".equals(reserva.getStatus())) {
+            Carona carona = caronaRepo.buscarPorId(reserva.getCaronaId())
+                .orElseThrow(() -> new CaronaException("Carona associada à reserva não foi encontrada."));
+
+            carona.setVagasDisponiveis(carona.getVagasDisponiveis() + 1);
+            caronaRepo.atualizar(carona);
+        }
+
+        reservaRepo.deletar(reservaId);
+    }
 
     private void validarEdicaoPermitida(Carona carona) throws CaronaException {
         if (!LocalDateTime.now().isBefore(carona.getDataHora())) {
@@ -208,12 +296,17 @@ public class CaronaService {
     }
 
     
-    private Usuario buscarUsuario(Long id) throws CaronaException, SQLException {
+    private Usuario buscarUsuario(Long id) throws CaronaException {
         if (id == null) {
             throw new CaronaException("ID do usuário inválido.");
         }
         
-        return usuarioRepo.buscarPorEmail(id.toString())
+        // ==================================================================
+        // === ESTA É A CORREÇÃO FINAL E DEFINITIVA ===
+        // ==================================================================
+        // O código antigo estava chamando 'buscarPorEmail(id.toString())', o que estava errado.
+        // O código correto é chamar 'buscarPorId(id)'.
+        return usuarioRepo.buscarPorId(id)
             .orElseThrow(() -> new CaronaException(
                 "Usuário não encontrado (id=" + id + ")."));
     }

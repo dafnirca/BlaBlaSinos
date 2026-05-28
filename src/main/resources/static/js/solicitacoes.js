@@ -18,8 +18,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnLogout = document.getElementById('btn-logout');
 
     let decisioPendente = null;
+<<<<<<< HEAD
     let pendingSolicitacoesCache = new Set();
     let firstLoad = true;
+=======
+>>>>>>> origin/develop
 
     // Logout
     btnLogout.addEventListener('click', (e) => {
@@ -36,15 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) throw new Error('Falha ao carregar solicitações.');
 
             const solicitacoes = await response.json();
-            const currentIds = new Set(solicitacoes.map(sol => sol.id));
-            if (!firstLoad) {
-                const newRequest = solicitacoes.find(sol => !pendingSolicitacoesCache.has(sol.id));
-                if (newRequest && !window.__BlaBlaSinosNotificationSystem) {
-                    showNotification('Nova solicitação', 'Você recebeu uma nova solicitação de vaga. Verifique na lista.');
-                }
-            }
-            pendingSolicitacoesCache = currentIds;
-            firstLoad = false;
             renderSolicitacoes(solicitacoes);
         } catch (error) {
             console.error('Erro ao carregar solicitações:', error);
@@ -149,6 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+<<<<<<< HEAD
     function showNotification(title, message) {
         let container = document.getElementById('toast-container');
         if (!container) {
@@ -167,6 +162,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => toast.remove(), 5600);
     }
 
+=======
+>>>>>>> origin/develop
     // Recarrega a cada 10 segundos
     carregarSolicitacoes();
     setInterval(carregarSolicitacoes, 10000);
