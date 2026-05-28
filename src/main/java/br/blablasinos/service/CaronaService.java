@@ -16,7 +16,7 @@ public class CaronaService {
     public static final int VAGAS_MAXIMAS = 4;
 
     private static final List<String> CAMPUS_KEYWORDS = List.of(
-        "unisinos", "são leopoldo", "sao leopoldo", "porto alegre"
+        "são leopoldo", "sao leopoldo", "porto alegre", "poa", "são leo", "sao leo"
     );
 
     private final CaronaRepository  caronaRepo;
@@ -137,11 +137,23 @@ public class CaronaService {
     }
 
     private void validarCampus(String origem, String destino) throws CaronaException {
+        if (contemUnisinosSemCampus(origem) || contemUnisinosSemCampus(destino)) {
+            throw new CaronaException(
+                "A origem ou o destino deve informar um campus real " +
+                "(São Leopoldo ou Porto Alegre) e não apenas 'Unisinos' (RN02.1).");
+        }
+
         if (!contemCampus(origem) && !contemCampus(destino)) {
             throw new CaronaException(
                 "A origem ou o destino deve ser um campus Unisinos " +
                 "(São Leopoldo ou Porto Alegre) (RN02.1).");
         }
+    }
+
+    private boolean contemUnisinosSemCampus(String local) {
+        if (local == null) return false;
+        String n = local.toLowerCase().trim();
+        return n.contains("unisinos") && !contemCampus(n);
     }
 
     private boolean contemCampus(String local) {

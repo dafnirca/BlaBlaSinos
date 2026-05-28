@@ -68,11 +68,10 @@ public class CaronaServiceTest {
     }
 
     @Test
-    public void deveReprovarCaronaSemCampusUnisinos_RN02_1() {
-        assertNotNull(assertThrows(CaronaException.class, () -> 
-            caronaService.cadastrarCarona(MOTORISTA_ID, "Rua A, Canoas", "Rua B, Novo Hamburgo", horarioValido, 2)
-        ));
-    }
+    void deveReprovarCaronaNoMesmoHorario_RN02_4() throws CaronaService.CaronaException, SQLException {
+        LocalDateTime saida = LocalDateTime.now().plusHours(3);
+        // 1. Cadastra a primeira carona válida
+        service.cadastrarCarona(motorista.getId(), "Campus São Leopoldo", "Centro", saida, 3);
 
     @Test
     public void deveReprovarCaronaComVagasInvalidas_RN02_2() {

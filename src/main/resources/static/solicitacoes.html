@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlaBlaSinos - Solicitações de Caronas</title>
+    <link rel="stylesheet" href="css/solicitacoes.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Solicitações de Passageiros</h1>
+                <nav>
+                    <a href="perfil.html">Perfil</a>
+                    <a href="gerenciar-caronas.html">Minhas Caronas</a>
+                    <a href="buscar-caronas.html">Buscar Caronas</a>
+                    <a id="btn-logout" href="#" style="color: #e74c3c;">Sair</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section class="solicitacoes-section">
+                <div class="section-header">
+                    <h2>Solicitações Pendentes</h2>
+                    <p id="solicitacoes-count">Carregando...</p>
+                </div>
+
+                <div id="solicitacoes-container">
+                    <table id="solicitacoes-table" class="hidden">
+                        <thead>
+                            <tr>
+                                <th>Passageiro</th>
+                                <th>Carona</th>
+                                <th>Data/Hora</th>
+                                <th>Origem → Destino</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="solicitacoes-list">
+                        </tbody>
+                    </table>
+
+                    <div id="empty-state" class="empty-state">
+                        <p>Você não tem solicitações pendentes no momento.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal de Confirmação -->
+        <div id="modal-confirmacao" class="modal hidden">
+            <div class="modal-content">
+                <h3>Confirmar Decisão</h3>
+                <p id="modal-mensagem"></p>
+                <div class="modal-actions">
+                    <button id="btn-confirmar" class="btn btn-primary">Confirmar</button>
+                    <button id="btn-cancelar-modal" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/solicitacoes.js"></script>
+</body>
+</html>
