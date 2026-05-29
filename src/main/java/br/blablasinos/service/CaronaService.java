@@ -147,6 +147,10 @@ public class CaronaService {
         Carona carona = caronaRepo.buscarPorId(caronaId)
             .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
 
+        if (carona.getMotoristaId().equals(passageiroId)) {
+            throw new CaronaException("O motorista não pode solicitar sua própria carona.");
+        }
+
         if (carona.getVagasDisponiveis() <= 0) {
             throw new CaronaException("Não há vagas disponíveis nesta carona (RN04.1).");
         }
