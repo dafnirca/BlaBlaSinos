@@ -30,11 +30,15 @@ function renderCaronas(caronas) {
             <td>${carona.vagasDisponiveis}/${carona.vagasTotais}</td>
             <td>${carona.valor || '0.00'}</td>
             <td class="actions">
-                <button class="btn-edit" data-id="${carona.id}" disabled>Editar</button>
-                <button class="btn-delete" data-id="${carona.id}" disabled>Cancelar</button>
+                <button class="btn-edit" data-id="${carona.id}">Editar</button>
+                <button class="btn-delete" data-id="${carona.id}">Cancelar</button>
             </td>
         `;
         caronasList.appendChild(tr);
+        const btnEdit = tr.querySelector('.btn-edit');
+        const btnDelete = tr.querySelector('.btn-delete');
+        if (btnEdit) btnEdit.addEventListener('click', () => abrirModalParaEdicao(carona));
+        if (btnDelete) btnDelete.addEventListener('click', () => cancelarCarona(carona.id));
     });
 }
 
@@ -82,24 +86,67 @@ async function salvarCarona(event) {
         vagasTotais: parseInt(document.getElementById('vagas').value),
         valor: parseFloat(document.getElementById('valor').value) || 0
     };
+    const editingId = document.getElementById('carona-id').value;
 
     try {
-        const response = await fetch('/api/caronas', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(caronaData)
-        });
-        const result = await response.json();
-
-        if (response.ok) {
-            alert("Carona oferecida com sucesso!");
-            closeModal(); // CORREÇÃO: Fecha o modal após o sucesso
-            carregarMinhasCaronas(); // Recarrega a lista para mostrar a nova carona
+        let response;
+        if (editingId && editingId.trim() !== '') {
+            // Edit existing
+            response = await fetch(`/api/caronas?id=${editingId}&motoristaId=${motoristaId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...caronaData, id: parseInt(editingId) })
+            });
         } else {
-            throw new Error(result.error);
+            // Create new
+            response = await fetch('/api/caronas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(caronaData)
+            });
+        }
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(editingId ? "Carona atualizada com sucesso!" : "Carona oferecida com sucesso!");
+            closeModal();
+            carregarMinhasCaronas();
+        } else {
+            throw new Error(result.error || 'Erro desconhecido');
         }
     } catch (error) {
         alert(`Erro ao salvar carona: ${error.message}`);
+    }
+}
+
+// Preenche o modal para editar uma carona
+function abrirModalParaEdicao(carona) {
+    modalTitle.textContent = 'Editar Carona';
+    document.getElementById('carona-id').value = carona.id || '';
+    document.getElementById('origem').value = carona.origem || '';
+    document.getElementById('destino').value = carona.destino || '';
+    const dt = new Date(carona.dataHora);
+    document.getElementById('data').value = dt.toISOString().slice(0,10);
+    document.getElementById('hora').value = dt.toTimeString().slice(0,5);
+    document.getElementById('vagas').value = carona.vagasTotais || '';
+    document.getElementById('valor').value = carona.valor || '';
+    modal.classList.remove('hidden');
+}
+
+async function cancelarCarona(caronaId) {
+    const motoristaId = localStorage.getItem('userId');
+    if (!confirm('Tem certeza que deseja cancelar esta carona?')) return;
+    try {
+        const response = await fetch(`/api/caronas?id=${caronaId}&motoristaId=${motoristaId}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (response.ok) {
+            alert(result.message || 'Carona cancelada com sucesso');
+            carregarMinhasCaronas();
+        } else {
+            throw new Error(result.error || 'Erro desconhecido');
+        }
+    } catch (error) {
+        alert(`Erro ao cancelar carona: ${error.message}`);
     }
 }
 

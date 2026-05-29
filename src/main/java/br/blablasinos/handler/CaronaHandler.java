@@ -1,11 +1,5 @@
 package br.blablasinos.handler;
 
-import br.blablasinos.model.Carona;
-import br.blablasinos.service.CaronaService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,6 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+import br.blablasinos.model.Carona;
+import br.blablasinos.service.CaronaService;
 
 public class CaronaHandler implements HttpHandler {
 
@@ -41,11 +43,71 @@ public class CaronaHandler implements HttpHandler {
                 handleGetMinhasCaronas(exchange); // Rota para listar caronas do motorista
             } else if ("/api/caronas".equals(path) && "POST".equals(method)) {
                 handlePost(exchange); // Rota para criar uma nova carona
+            } else if ("/api/caronas".equals(path) && "PUT".equals(method)) {
+                handlePut(exchange); // Rota para editar uma carona
+            } else if ("/api/caronas".equals(path) && "DELETE".equals(method)) {
+                handleDelete(exchange); // Rota para cancelar uma carona
             } else {
                 sendResponse(exchange, 404, "{\"error\": \"Rota nao encontrada\"}");
             }
         } catch (Exception e) {
             sendResponse(exchange, 400, "{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
+    // Lida com o cancelamento (deletar) de uma carona
+    private void handleDelete(HttpExchange exchange) throws Exception {
+        String query = exchange.getRequestURI().getQuery();
+        Map<String, String> params = parseQuery(query);
+
+        if (!params.containsKey("id") || params.get("id") == null || params.get("id").isBlank()) {
+            throw new Exception("Parametro 'id' da carona e necessario");
+        }
+        if (!params.containsKey("motoristaId") || params.get("motoristaId") == null || params.get("motoristaId").isBlank()) {
+            throw new Exception("Parametro 'motoristaId' e necessario");
+        }
+
+        long caronaId = Long.parseLong(params.get("id"));
+        long motoristaId = Long.parseLong(params.get("motoristaId"));
+
+        caronaService.cancelarCarona(motoristaId, caronaId);
+
+        sendResponse(exchange, 200, gson.toJson(Map.of("message", "Sua carona foi cancelada.")));
+    }
+
+    // Lida com a edição de uma carona existente
+    private void handlePut(HttpExchange exchange) throws Exception {
+        try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
+            Carona carona = gson.fromJson(reader, Carona.class);
+            String query = exchange.getRequestURI().getQuery();
+            Map<String, String> params = parseQuery(query);
+
+            Long motoristaId = null;
+            if (params.containsKey("motoristaId") && params.get("motoristaId") != null && !params.get("motoristaId").isBlank()) {
+                motoristaId = Long.parseLong(params.get("motoristaId"));
+            }
+            if (motoristaId == null) motoristaId = carona.getMotoristaId();
+
+            Long caronaId = null;
+            if (params.containsKey("id") && params.get("id") != null && !params.get("id").isBlank()) {
+                caronaId = Long.parseLong(params.get("id"));
+            }
+            if (caronaId == null) caronaId = carona.getId();
+
+            if (motoristaId == null || caronaId == null) {
+                throw new Exception("motoristaId e id da carona sao obrigatorios para edicao");
+            }
+
+            Carona atualizada = caronaService.editarCarona(
+                motoristaId,
+                caronaId,
+                carona.getOrigem(),
+                carona.getDestino(),
+                carona.getDataHora(),
+                carona.getVagasTotais()
+            );
+
+            sendResponse(exchange, 200, gson.toJson(atualizada));
         }
     }
 
