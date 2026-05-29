@@ -46,11 +46,12 @@ class CaronaServiceTest {
     @Test
     void deveCadastrarCaronaComDadosValidos() throws CaronaService.CaronaException, SQLException {
         LocalDateTime saida = LocalDateTime.now().plusHours(2);
-        Carona carona = service.cadastrarCarona(motorista.getId(), "Unisinos São Leopoldo", "Centro POA", saida, 3);
-        
+        Carona carona = service.cadastrarCarona(motorista.getId(), "Unisinos São Leopoldo", "Centro POA", saida, 3, 12.5);
+
         assertNotNull(carona);
         assertNotNull(carona.getId());
         assertEquals(motorista.getId(), carona.getMotoristaId());
+        assertEquals(12.5, carona.getValor(), 0.001);
     }
 
     @Test

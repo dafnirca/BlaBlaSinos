@@ -19,9 +19,13 @@ CREATE TABLE IF NOT EXISTS caronas (
     motorista_id INTEGER NOT NULL,
     origem TEXT NOT NULL,
     destino TEXT NOT NULL,
-    data_hora TEXT NOT NULL,
+    horario_saida TEXT NOT NULL,
+    vagas_total INTEGER NOT NULL,
     vagas_disponiveis INTEGER NOT NULL,
-    vagas_totais INTEGER NOT NULL,
+    valor REAL NOT NULL DEFAULT 0,
+    observacoes TEXT DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'ATIVA',
+    criado_em TEXT NOT NULL,
     FOREIGN KEY (motorista_id) REFERENCES usuarios (id)
 );
 

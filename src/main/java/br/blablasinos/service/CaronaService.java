@@ -48,11 +48,22 @@ public class CaronaService {
                                   LocalDateTime dataHora,
                                   int vagasTotais)
             throws CaronaException, SQLException {
+        return cadastrarCarona(motoristaId, origen, destino, dataHora, vagasTotais, 0.0);
+    }
+
+    public Carona cadastrarCarona(Long motoristaId,
+                                  String origen,
+                                  String destino,
+                                  LocalDateTime dataHora,
+                                  int vagasTotais,
+                                  double valor)
+            throws CaronaException, SQLException {
 
         Usuario motorista = buscarUsuario(motoristaId);
         validarPerfilMotorista(motorista);    
         validarCampus(origen, destino);      
         validarVagas(vagasTotais);          
+        validarValor(valor);                
         validarDataHoraFutura(dataHora);      
 
         if (caronaRepo.existeConflitoHorario(motoristaId, dataHora)) {  
@@ -67,7 +78,8 @@ public class CaronaService {
         carona.setDestino(destino.trim());
         carona.setDataHora(dataHora);
         carona.setVagasTotais(vagasTotais);
-        carona.setVagasDisponiveis(vagasTotais);  
+        carona.setVagasDisponiveis(vagasTotais);
+        carona.setValor(valor);
 
         caronaRepo.salvar(carona);   
         return carona;
@@ -252,6 +264,12 @@ public class CaronaService {
         if (local == null) return false;
         String n = local.toLowerCase().trim();
         return CAMPUS_KEYWORDS.stream().anyMatch(n::contains);
+    }
+
+    private void validarValor(double valor) throws CaronaException {
+        if (valor < 0) {
+            throw new CaronaException("O valor da carona não pode ser negativo.");
+        }
     }
 
     private void validarVagas(int vagas) throws CaronaException {

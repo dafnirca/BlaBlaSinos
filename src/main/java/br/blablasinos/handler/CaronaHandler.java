@@ -87,7 +87,8 @@ public class CaronaHandler implements HttpHandler {
                 carona.getOrigem(),
                 carona.getDestino(),
                 carona.getDataHora(),
-                carona.getVagasTotais()
+                carona.getVagasTotais(),
+                carona.getValor()
             );
             sendResponse(exchange, 201, gson.toJson(caronaCadastrada));
         }
