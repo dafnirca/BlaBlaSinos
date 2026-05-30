@@ -43,8 +43,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Função auxiliar para buscar nome do passageiro
+    async function buscarNomePassageiro(passageiroId) {
+        try {
+            const response = await fetch(`/api/perfil?id=${encodeURIComponent(passageiroId)}`);
+            if (response.ok) {
+                const usuario = await response.json();
+                return usuario.nome || 'Passageiro';
+            }
+            return 'Passageiro';
+        } catch (error) {
+            console.error(`Erro ao buscar passageiro ${passageiroId}:`, error);
+            return 'Passageiro';
+        }
+    }
+
     // Renderiza a tabela de solicitações
-    function renderSolicitacoes(solicitacoes) {
+    async function renderSolicitacoes(solicitacoes) {
         solicitacoesList.innerHTML = '';
         const hasSolicitacoes = solicitacoes && solicitacoes.length > 0;
 
@@ -58,10 +73,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         solicitacoesCount.textContent = `${solicitacoes.length} solicitação(ões) pendente(s)`;
 
+        // Busca nomes de todos os passageiros em paralelo
+        const nomeMap = {};
+        await Promise.all(
+            solicitacoes.map(async (sol) => {
+                nomeMap[sol.passageiroId] = await buscarNomePassageiro(sol.passageiroId);
+            })
+        );
+
         solicitacoes.forEach(sol => {
             const tr = document.createElement('tr');
+            const nomePassageiro = nomeMap[sol.passageiroId] || 'Passageiro';
             tr.innerHTML = `
-                <td>${sol.passageiroId || 'N/A'}</td>
+                <td>${nomePassageiro}</td>
                 <td>${sol.caronaId}</td>
                 <td>${formatarData(sol.dataHora || 'N/A')}</td>
                 <td>Origem → Destino</td>
