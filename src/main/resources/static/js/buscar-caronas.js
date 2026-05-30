@@ -74,6 +74,33 @@ async function buscarCaronasNoBackend(event) {
             throw new Error(resultados.error || 'Falha ao buscar caronas.');
         }
 
+        // Se a API não retornar o nome do motorista, buscá-lo por ID e enriquecer os resultados
+        try {
+            const idsMotoristas = [...new Set(resultados.filter(r => !r.motoristaNome && r.motoristaId).map(r => r.motoristaId))];
+            if (idsMotoristas.length > 0) {
+                const mapaMotoristas = {};
+                await Promise.all(idsMotoristas.map(async id => {
+                    try {
+                        const resp = await fetch(`/api/perfil?id=${encodeURIComponent(id)}`);
+                        if (resp.ok) {
+                            const usuario = await resp.json();
+                            mapaMotoristas[id] = usuario.nome || 'Motorista';
+                        } else {
+                            mapaMotoristas[id] = 'Motorista';
+                        }
+                    } catch (err) {
+                        mapaMotoristas[id] = 'Motorista';
+                    }
+                }));
+
+                resultados.forEach(r => {
+                    if (!r.motoristaNome && r.motoristaId) r.motoristaNome = mapaMotoristas[r.motoristaId] || 'Motorista';
+                });
+            }
+        } catch (err) {
+            console.warn('Falha ao enriquecer resultados com nome do motorista:', err);
+        }
+
         mostrarResultados(resultados);
 
     } catch (error) {
