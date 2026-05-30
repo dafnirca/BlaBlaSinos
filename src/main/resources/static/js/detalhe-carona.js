@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.getElementById('carona-origem').textContent = carona.origem || 'N/A';
             document.getElementById('carona-destino').textContent = carona.destino || 'N/A';
-            document.getElementById('carona-datahora').textContent = carona.dataHora ? new Date(carona.dataHora).toLocaleString('pt-BR') : 'N/A';
+            document.getElementById('carona-datahora').textContent = carona.dataHora ? new Date(carona.dataHora).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'N/A';
             document.getElementById('carona-vagas').textContent = `${carona.vagasDisponiveis}/${carona.vagasTotais}`;
             document.getElementById('carona-valor').textContent = carona.valor ? `R$ ${carona.valor.toFixed(2)}` : 'N/A';
 
