@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('carona-destino').textContent = carona.destino || 'N/A';
             document.getElementById('carona-datahora').textContent = carona.dataHora ? new Date(carona.dataHora).toLocaleString('pt-BR') : 'N/A';
             document.getElementById('carona-vagas').textContent = `${carona.vagasDisponiveis}/${carona.vagasTotais}`;
+            document.getElementById('carona-valor').textContent = carona.valor ? `R$ ${carona.valor.toFixed(2)}` : 'N/A';
 
             // Busca dados do motorista
             try {
