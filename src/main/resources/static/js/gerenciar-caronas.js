@@ -46,11 +46,11 @@ function openModal() {
     caronaForm.reset();
     modalTitle.textContent = 'Oferecer Nova Carona';
     document.getElementById('carona-id').value = '';
-    modal.classList.remove('hidden'); // CORREÇÃO: Mostra o modal
+    modal.classList.remove('hidden');
 }
 
 function closeModal() {
-    modal.classList.add('hidden'); // CORREÇÃO: Esconde o modal
+    modal.classList.add('hidden');
 }
 
 async function carregarMinhasCaronas() {
@@ -68,7 +68,7 @@ async function carregarMinhasCaronas() {
         renderCaronas(caronas);
     } catch (error) {
         console.error(error);
-        renderCaronas([]); // Mostra a lista vazia em caso de erro
+        renderCaronas([]);
     }
 }
 
@@ -77,11 +77,19 @@ async function salvarCarona(event) {
     const motoristaId = localStorage.getItem('userId');
     const data = document.getElementById('data').value;
     const hora = document.getElementById('hora').value;
+    const origem = document.getElementById('origem').value;
+    const destino = document.getElementById('destino').value;
+
+    // Validação: origem e destino não podem ser iguais
+    if (origem.trim().toLowerCase() === destino.trim().toLowerCase()) {
+        alert("A origem e o destino não podem ser iguais.");
+        return;
+    }
 
     const caronaData = {
         motoristaId: parseInt(motoristaId),
-        origem: document.getElementById('origem').value,
-        destino: document.getElementById('destino').value,
+        origem,
+        destino,
         dataHora: `${data}T${hora}`,
         vagasTotais: parseInt(document.getElementById('vagas').value),
         valor: parseFloat(document.getElementById('valor').value) || 0
@@ -153,5 +161,5 @@ async function cancelarCarona(caronaId) {
 // --- Inicialização e Event Listeners ---
 window.addEventListener('load', carregarMinhasCaronas);
 btnAdicionar.addEventListener('click', openModal);
-btnCancelarModal.addEventListener('click', closeModal); // CORREÇÃO: Garante que o botão de cancelar feche o modal
+btnCancelarModal.addEventListener('click', closeModal);
 caronaForm.addEventListener('submit', salvarCarona);
