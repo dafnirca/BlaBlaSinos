@@ -1,10 +1,12 @@
 package br.blablasinos.service;
 
 import br.blablasinos.model.Carona;
+import br.blablasinos.model.Notificacao;
 import br.blablasinos.model.Reserva;
 import br.blablasinos.model.TipoUsuario;
 import br.blablasinos.model.Usuario;
 import br.blablasinos.repository.CaronaRepository;
+import br.blablasinos.repository.NotificacaoRepository;
 import br.blablasinos.repository.ReservaRepository;
 import br.blablasinos.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +27,20 @@ public class CaronaIntegrationTest {
     private FakeCaronaRepository caronaRepo;
     private InMemoryUsuarioRepository usuarioRepo;
     private InMemoryReservaRepository reservaRepo;
+    private InMemoryNotificacaoRepository notificacaoRepo;
 
     @BeforeEach
     void setUp() {
         caronaRepo = new FakeCaronaRepository();
         usuarioRepo = new InMemoryUsuarioRepository();
         reservaRepo = new InMemoryReservaRepository();
-        service = new CaronaService(caronaRepo, usuarioRepo, reservaRepo);
+        notificacaoRepo = new InMemoryNotificacaoRepository();
+        service = new CaronaService(
+            caronaRepo,
+            usuarioRepo,
+            reservaRepo,
+            new NotificacaoService(notificacaoRepo)
+        );
     }
 
     @Test
@@ -86,6 +95,66 @@ public class CaronaIntegrationTest {
 
         List<Reserva> reservasPassageiro = service.listarSolicitacoesDoPassageiro(passageiro.getId());
         assertTrue(reservasPassageiro.stream().anyMatch(r -> "CONFIRMADA".equals(r.getStatus())));
+
+        List<Notificacao> notificacoesMotorista = notificacaoRepo.listarPorUsuario(motorista.getId());
+        assertTrue(notificacoesMotorista.stream().anyMatch(n -> "NOVA_SOLICITACAO".equals(n.getTipo())));
+
+        List<Notificacao> notificacoesPassageiro = notificacaoRepo.listarPorUsuario(passageiro.getId());
+        assertTrue(notificacoesPassageiro.stream().anyMatch(n -> "SOLICITACAO_ACEITA".equals(n.getTipo())));
+    }
+
+    @Test
+    void fluxoSolicitacaoRecusaNotificaPassageiro() throws Exception {
+        Usuario motorista = new Usuario(1L, "Motorista", "m@teste.com", "senha123", TipoUsuario.MOTORISTA);
+        motorista.setCnh("111");
+        motorista.setModeloVeiculo("Modelo");
+        motorista.setCorVeiculo("Cor");
+        motorista.setPlacaVeiculo("XXX-0001");
+        usuarioRepo.salvar(motorista);
+
+        LocalDateTime saida = LocalDateTime.now().plusHours(4);
+        Carona carona = service.cadastrarCarona(motorista.getId(), "Unisinos Sao Leopoldo", "Centro POA", saida, 3);
+
+        Usuario passageiro = new Usuario(2L, "Passageiro", "p@teste.com", "senha123", TipoUsuario.PASSAGEIRO);
+        usuarioRepo.salvar(passageiro);
+
+        Reserva reserva = service.solicitarVaga(passageiro.getId(), carona.getId());
+        Reserva decidida = service.decidirSolicitacao(motorista.getId(), reserva.getId(), false);
+
+        assertEquals("CANCELADA", decidida.getStatus());
+
+        List<Notificacao> notificacoesPassageiro = notificacaoRepo.listarPorUsuario(passageiro.getId());
+        assertTrue(notificacoesPassageiro.stream().anyMatch(n -> "SOLICITACAO_RECUSADA".equals(n.getTipo())));
+    }
+
+    static class InMemoryNotificacaoRepository implements NotificacaoRepository {
+        private final Map<Long, Notificacao> db = new HashMap<>();
+        private long next = 1;
+
+        @Override
+        public Notificacao salvar(Notificacao notificacao) {
+            notificacao.setId(next++);
+            db.put(notificacao.getId(), notificacao);
+            return notificacao;
+        }
+
+        @Override
+        public List<Notificacao> listarPorUsuario(long usuarioId) {
+            return db.values().stream().filter(n -> n.getUsuarioId().equals(usuarioId)).toList();
+        }
+
+        @Override
+        public Optional<Notificacao> buscarPorId(long id) {
+            return Optional.ofNullable(db.get(id));
+        }
+
+        @Override
+        public void marcarComoLida(long id) {
+            Notificacao notificacao = db.get(id);
+            if (notificacao != null) {
+                notificacao.setLida(true);
+            }
+        }
     }
 
     static class InMemoryReservaRepository implements ReservaRepository {

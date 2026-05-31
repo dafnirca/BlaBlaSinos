@@ -26,12 +26,18 @@ public class CaronaService {
     private final CaronaRepository  caronaRepo;
     private final UsuarioRepository usuarioRepo;
     private final ReservaRepository reservaRepo;
+    private final NotificacaoService notificacaoService;
 
     // Construtor para testes
     public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo, ReservaRepository reservaRepo) {
+        this(caronaRepo, usuarioRepo, reservaRepo, new NotificacaoService());
+    }
+
+    public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo, ReservaRepository reservaRepo, NotificacaoService notificacaoService) {
         this.caronaRepo  = caronaRepo;
         this.usuarioRepo = usuarioRepo;
         this.reservaRepo = reservaRepo;
+        this.notificacaoService = notificacaoService;
     }
 
     // Construtor padrão que os Handlers usam
@@ -39,6 +45,7 @@ public class CaronaService {
         this.caronaRepo = new CaronaRepository("jdbc:sqlite:caronas.db");
         this.usuarioRepo = new SqliteUsuarioRepository();
         this.reservaRepo = new SqliteReservaRepository();
+        this.notificacaoService = new NotificacaoService();
     }
 
 
@@ -172,7 +179,14 @@ public class CaronaService {
         novaReserva.setCaronaId(caronaId);
         novaReserva.setStatus("PENDENTE");
 
-        return reservaRepo.salvar(novaReserva);
+        Reserva reservaCriada = reservaRepo.salvar(novaReserva);
+        notificarUsuario(
+            carona.getMotoristaId(),
+            "NOVA_SOLICITACAO",
+            "Voce recebeu uma nova solicitacao para a carona #" + caronaId + ".",
+            reservaCriada.getId()
+        );
+        return reservaCriada;
     }
 
     public List<Reserva> listarSolicitacoesPendentes(Long motoristaId) throws SQLException {
@@ -211,7 +225,16 @@ public class CaronaService {
         }
 
         reservaRepo.update(reserva);
+        String tipo = aceitar ? "SOLICITACAO_ACEITA" : "SOLICITACAO_RECUSADA";
+        String mensagem = aceitar
+            ? "Sua solicitacao da carona #" + carona.getId() + " foi aceita."
+            : "Sua solicitacao da carona #" + carona.getId() + " foi recusada.";
+        notificarUsuario(reserva.getPassageiroId(), tipo, mensagem, reserva.getId());
         return reserva;
+    }
+
+    private void notificarUsuario(Long usuarioId, String tipo, String mensagem, Long referenciaId) {
+        notificacaoService.notificar(usuarioId, tipo, mensagem, referenciaId);
     }
 
     public void cancelarSolicitacao(Long passageiroId, Long reservaId) throws CaronaException, SQLException {

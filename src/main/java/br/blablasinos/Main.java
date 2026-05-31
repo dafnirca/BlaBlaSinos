@@ -3,6 +3,7 @@ package br.blablasinos;
 import br.blablasinos.handler.CadastroHandler;
 import br.blablasinos.handler.CaronaHandler;
 import br.blablasinos.handler.LoginHandler;
+import br.blablasinos.handler.NotificacaoHandler;
 import br.blablasinos.handler.PerfilHandler;
 import br.blablasinos.handler.SolicitacaoHandler;
 import br.blablasinos.handler.StaticFileHandler;
@@ -22,6 +23,7 @@ public class Main {
         server.createContext("/api/perfil", new PerfilHandler());
         server.createContext("/api/caronas", new CaronaHandler()); // << ESTA LINHA CORRIGE O PROBLEMA
         server.createContext("/api/solicitacoes", new SolicitacaoHandler());
+        server.createContext("/api/notificacoes", new NotificacaoHandler());
 
         // === ROTA PARA ARQUIVOS ESTÁTICOS (a mais geral, por último) ===
         // Qualquer outra URL que não seja uma das APIs acima será tratada como um arquivo.
