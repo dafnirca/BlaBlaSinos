@@ -38,6 +38,7 @@ public class CaronaRepository {
                 horario_saida     TEXT    NOT NULL,
                 vagas_total       INTEGER NOT NULL,
                 vagas_disponiveis INTEGER NOT NULL,
+                valor             REAL    NOT NULL DEFAULT 0,
                 observacoes       TEXT    DEFAULT '',
                 status            TEXT    NOT NULL DEFAULT 'ATIVA',
                 criado_em         TEXT    NOT NULL,
@@ -47,6 +48,12 @@ public class CaronaRepository {
         try (Connection conn = DriverManager.getConnection(url);
              Statement  stmt = conn.createStatement()) {
             stmt.execute(sql);
+
+            try (ResultSet columns = conn.getMetaData().getColumns(null, null, "caronas", "valor")) {
+                if (!columns.next()) {
+                    stmt.execute("ALTER TABLE caronas ADD COLUMN valor REAL NOT NULL DEFAULT 0");
+                }
+            }
         }
     }
 
@@ -55,8 +62,8 @@ public class CaronaRepository {
         String sql = """
             INSERT INTO caronas
                 (motorista_id, origem, destino, horario_saida,
-                 vagas_total, vagas_disponiveis, observacoes, status, criado_em)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 vagas_total, vagas_disponiveis, valor, observacoes, status, criado_em)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
         try (Connection conn = DriverManager.getConnection(url);
@@ -68,9 +75,10 @@ public class CaronaRepository {
             ps.setString(4, carona.getDataHora().toString());
             ps.setInt   (5, carona.getVagasTotais());
             ps.setInt   (6, carona.getVagasDisponiveis());
-            ps.setString(7, ""); // observacoes padrão
-            ps.setString(8, "ATIVA"); // status padrão
-            ps.setString(9, LocalDateTime.now().toString()); // criado_em
+            ps.setDouble(7, carona.getValor());
+            ps.setString(8, ""); // observacoes padrão
+            ps.setString(9, "ATIVA"); // status padrão
+            ps.setString(10, LocalDateTime.now().toString()); // criado_em
 
             ps.executeUpdate();
 
@@ -200,7 +208,7 @@ public class CaronaRepository {
     public void atualizarEdicao(Carona carona) throws SQLException {
         String sql = """
             UPDATE caronas
-            SET origem = ?, destino = ?, horario_saida = ?, vagas_total = ?, vagas_disponiveis = ?
+            SET origem = ?, destino = ?, horario_saida = ?, vagas_total = ?, vagas_disponiveis = ?, valor = ?
             WHERE id = ?
             """;
 
@@ -212,7 +220,8 @@ public class CaronaRepository {
             ps.setString(3, carona.getDataHora().toString());
             ps.setInt   (4, carona.getVagasTotais());
             ps.setInt   (5, carona.getVagasDisponiveis());
-            ps.setLong  (6, carona.getId());
+            ps.setDouble(6, carona.getValor());
+            ps.setLong  (7, carona.getId());
 
             int linhas = ps.executeUpdate();
             if (linhas == 0) {
@@ -261,8 +270,9 @@ public class CaronaRepository {
             rs.getString("origem"),
             rs.getString("destino"),
             LocalDateTime.parse(rs.getString("horario_saida")),
+            rs.getInt   ("vagas_disponiveis"),
             rs.getInt   ("vagas_total"),
-            rs.getInt   ("vagas_disponiveis")
+            rs.getDouble("valor")
         );
     }
 }

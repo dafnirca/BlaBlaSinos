@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnLogout = document.getElementById('btn-logout');
 
     let decisioPendente = null;
+    let pendingSolicitacoesCache = new Set();
+    let firstLoad = true;
 
     // Logout
     btnLogout.addEventListener('click', (e) => {
@@ -41,8 +43,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Função auxiliar para buscar nome do passageiro
+    async function buscarNomePassageiro(passageiroId) {
+        try {
+            const response = await fetch(`/api/perfil?id=${encodeURIComponent(passageiroId)}`);
+            if (response.ok) {
+                const usuario = await response.json();
+                return usuario.nome || 'Passageiro';
+            }
+            return 'Passageiro';
+        } catch (error) {
+            console.error(`Erro ao buscar passageiro ${passageiroId}:`, error);
+            return 'Passageiro';
+        }
+    }
+
+    // Função auxiliar para buscar dados da carona
+    async function buscarDadosCarona(caronaId) {
+        try {
+            const response = await fetch(`/api/caronas?id=${encodeURIComponent(caronaId)}`);
+            if (response.ok) {
+                const carona = await response.json();
+                return {
+                    dataHora: carona.dataHora,
+                    origem: carona.origem || 'N/A',
+                    destino: carona.destino || 'N/A'
+                };
+            }
+            return {
+                dataHora: null,
+                origem: 'N/A',
+                destino: 'N/A'
+            };
+        } catch (error) {
+            console.error(`Erro ao buscar carona ${caronaId}:`, error);
+            return {
+                dataHora: null,
+                origem: 'N/A',
+                destino: 'N/A'
+            };
+        }
+    }
+
     // Renderiza a tabela de solicitações
-    function renderSolicitacoes(solicitacoes) {
+    async function renderSolicitacoes(solicitacoes) {
         solicitacoesList.innerHTML = '';
         const hasSolicitacoes = solicitacoes && solicitacoes.length > 0;
 
@@ -56,13 +100,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         solicitacoesCount.textContent = `${solicitacoes.length} solicitação(ões) pendente(s)`;
 
+        // Busca nomes de todos os passageiros e dados das caronas em paralelo
+        const nomeMap = {};
+        const caronaMap = {};
+        
+        await Promise.all([
+            ...solicitacoes.map(async (sol) => {
+                nomeMap[sol.passageiroId] = await buscarNomePassageiro(sol.passageiroId);
+            }),
+            ...solicitacoes.map(async (sol) => {
+                caronaMap[sol.caronaId] = await buscarDadosCarona(sol.caronaId);
+            })
+        ]);
+
         solicitacoes.forEach(sol => {
             const tr = document.createElement('tr');
+            const nomePassageiro = nomeMap[sol.passageiroId] || 'Passageiro';
+            const dadosCarona = caronaMap[sol.caronaId] || { dataHora: null, origem: 'N/A', destino: 'N/A' };
+            const rota = `${dadosCarona.origem} → ${dadosCarona.destino}`;
+            
             tr.innerHTML = `
-                <td>${sol.passageiroId || 'N/A'}</td>
+                <td>${nomePassageiro}</td>
                 <td>${sol.caronaId}</td>
-                <td>${formatarData(sol.dataHora || 'N/A')}</td>
-                <td>Origem → Destino</td>
+                <td>${formatarData(dadosCarona.dataHora || 'N/A')}</td>
+                <td>${rota}</td>
                 <td>
                     <div class="acoes-btn">
                         <button class="btn btn-aceitar" data-id="${sol.id}" data-acao="ACEITAR">
@@ -132,12 +193,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!dataStr || dataStr === 'N/A') return 'N/A';
         try {
             const data = new Date(dataStr);
-            return data.toLocaleString('pt-BR');
+            return data.toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
         } catch {
             return dataStr;
         }
     }
 
+    function showNotification(title, message) {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<strong>${title}</strong><p>${message}</p>`;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('visible'));
+        setTimeout(() => toast.classList.remove('visible'), 5000);
+        setTimeout(() => toast.remove(), 5600);
+    }
     // Recarrega a cada 10 segundos
     carregarSolicitacoes();
     setInterval(carregarSolicitacoes, 10000);

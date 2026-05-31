@@ -20,7 +20,7 @@ public class CaronaService {
     public static final int VAGAS_MAXIMAS = 4;
 
     private static final List<String> CAMPUS_KEYWORDS = List.of(
-        "unisinos", "são leopoldo", "sao leopoldo", "porto alegre"
+        "são leopoldo", "sao leopoldo", "porto alegre", "poa", "são leo", "sao leo"
     );
 
     private final CaronaRepository  caronaRepo;
@@ -48,11 +48,22 @@ public class CaronaService {
                                   LocalDateTime dataHora,
                                   int vagasTotais)
             throws CaronaException, SQLException {
+        return cadastrarCarona(motoristaId, origen, destino, dataHora, vagasTotais, 0.0);
+    }
+
+    public Carona cadastrarCarona(Long motoristaId,
+                                  String origen,
+                                  String destino,
+                                  LocalDateTime dataHora,
+                                  int vagasTotais,
+                                  double valor)
+            throws CaronaException, SQLException {
 
         Usuario motorista = buscarUsuario(motoristaId);
         validarPerfilMotorista(motorista);    
         validarCampus(origen, destino);      
         validarVagas(vagasTotais);          
+        validarValor(valor);                
         validarDataHoraFutura(dataHora);      
 
         if (caronaRepo.existeConflitoHorario(motoristaId, dataHora)) {  
@@ -67,7 +78,8 @@ public class CaronaService {
         carona.setDestino(destino.trim());
         carona.setDataHora(dataHora);
         carona.setVagasTotais(vagasTotais);
-        carona.setVagasDisponiveis(vagasTotais);  
+        carona.setVagasDisponiveis(vagasTotais);
+        carona.setValor(valor);
 
         caronaRepo.salvar(carona);   
         return carona;
@@ -147,6 +159,10 @@ public class CaronaService {
         Carona carona = caronaRepo.buscarPorId(caronaId)
             .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
 
+        if (carona.getMotoristaId().equals(passageiroId)) {
+            throw new CaronaException("O motorista não pode solicitar sua própria carona.");
+        }
+
         if (carona.getVagasDisponiveis() <= 0) {
             throw new CaronaException("Não há vagas disponíveis nesta carona (RN04.1).");
         }
@@ -225,6 +241,12 @@ public class CaronaService {
     }
 
     private void validarCampus(String origem, String destino) throws CaronaException {
+        if (contemUnisinosSemCampus(origem) || contemUnisinosSemCampus(destino)) {
+            throw new CaronaException(
+                "A origem ou o destino deve informar um campus real " +
+                "(São Leopoldo ou Porto Alegre) e não apenas 'Unisinos' (RN02.1).");
+        }
+
         if (!contemCampus(origem) && !contemCampus(destino)) {
             throw new CaronaException(
                 "A origem ou o destino deve ser um campus Unisinos " +
@@ -232,10 +254,22 @@ public class CaronaService {
         }
     }
 
+    private boolean contemUnisinosSemCampus(String local) {
+        if (local == null) return false;
+        String n = local.toLowerCase().trim();
+        return n.contains("unisinos") && !contemCampus(n);
+    }
+
     private boolean contemCampus(String local) {
         if (local == null) return false;
         String n = local.toLowerCase().trim();
         return CAMPUS_KEYWORDS.stream().anyMatch(n::contains);
+    }
+
+    private void validarValor(double valor) throws CaronaException {
+        if (valor < 0) {
+            throw new CaronaException("O valor da carona não pode ser negativo.");
+        }
     }
 
     private void validarVagas(int vagas) throws CaronaException {

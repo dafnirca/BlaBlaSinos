@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statusResultado = document.getElementById('status-resultado');
     const statusText = document.getElementById('status-text');
     const btnCancelar = document.getElementById('btn-cancelar');
+    let previousStatus = null;
+    let firstStatusLoad = true;
 
     // --- Busca e preenche os dados reais da carona e do motorista ---
     async function carregarDetalhesCarona() {
@@ -23,8 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.getElementById('carona-origem').textContent = carona.origem || 'N/A';
             document.getElementById('carona-destino').textContent = carona.destino || 'N/A';
-            document.getElementById('carona-datahora').textContent = carona.dataHora ? new Date(carona.dataHora).toLocaleString('pt-BR') : 'N/A';
+            document.getElementById('carona-datahora').textContent = carona.dataHora ? new Date(carona.dataHora).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'N/A';
             document.getElementById('carona-vagas').textContent = `${carona.vagasDisponiveis}/${carona.vagasTotais}`;
+            document.getElementById('carona-valor').textContent = carona.valor ? `R$ ${carona.valor.toFixed(2)}` : 'N/A';
 
             // Busca dados do motorista
             try {
@@ -56,10 +59,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (reservaExistente) {
                 reservaId = reservaExistente.id;
+                if (!firstStatusLoad && previousStatus && previousStatus !== reservaExistente.status) {
+                    if (!window.__BlaBlaSinosNotificationSystem) {
+                        if (reservaExistente.status === 'CONFIRMADA') {
+                            showNotification('Solicitação aceita', 'O motorista aceitou sua solicitação.');
+                        } else if (reservaExistente.status === 'CANCELADA') {
+                            showNotification('Solicitação recusada', 'O motorista recusou sua solicitação.');
+                        }
+                    }
+                }
+                previousStatus = reservaExistente.status;
                 atualizarStatus(reservaExistente.status);
             }
         } catch (error) {
             console.error('Falha ao carregar status da reserva:', error);
+        } finally {
+            firstStatusLoad = false;
         }
     }
 
@@ -78,6 +93,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnCancelar.style.display = 'none';
             btnSolicitar.style.display = 'none';
         }
+    }
+
+    function showNotification(title, message) {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<strong>${title}</strong><p>${message}</p>`;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('visible'));
+        setTimeout(() => toast.classList.remove('visible'), 5000);
+        setTimeout(() => toast.remove(), 5600);
     }
 
     const solicitarVaga = async () => {
@@ -148,5 +182,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Carrega dados da carona e do motorista, depois o status da reserva
     await carregarDetalhesCarona();
-    carregarStatusReserva();
+    await carregarStatusReserva();
+    setInterval(carregarStatusReserva, 5000);
 });

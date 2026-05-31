@@ -10,10 +10,17 @@ public class Carona {
     private LocalDateTime dataHora;
     private int vagasDisponiveis;
     private int vagasTotais;
+    private double valor;
 
     public Carona() {}
 
-    public Carona(Long id, Long motoristaId, String origem, String destino, LocalDateTime dataHora, int vagasDisponiveis, int vagasTotais) {
+    public Carona(Long id, Long motoristaId, String origem, String destino, LocalDateTime dataHora,
+                  int vagasDisponiveis, int vagasTotais) {
+        this(id, motoristaId, origem, destino, dataHora, vagasDisponiveis, vagasTotais, 0.0);
+    }
+
+    public Carona(Long id, Long motoristaId, String origem, String destino, LocalDateTime dataHora,
+                  int vagasDisponiveis, int vagasTotais, double valor) {
         this.id = id;
         this.motoristaId = motoristaId;
         this.origem = origem;
@@ -21,6 +28,7 @@ public class Carona {
         this.dataHora = dataHora;
         this.vagasDisponiveis = vagasDisponiveis;
         this.vagasTotais = vagasTotais;
+        this.valor = valor;
     }
 
     public Long getId() { return id; }
@@ -37,4 +45,6 @@ public class Carona {
     public void setVagasDisponiveis(int vagasDisponiveis) { this.vagasDisponiveis = vagasDisponiveis; }
     public int getVagasTotais() { return vagasTotais; }
     public void setVagasTotais(int vagasTotais) { this.vagasTotais = vagasTotais; }
+    public double getValor() { return valor; }
+    public void setValor(double valor) { this.valor = valor; }
 }

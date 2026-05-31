@@ -35,6 +35,27 @@ public class CaronaIntegrationTest {
     }
 
     @Test
+    void motoristaNaoPodeSolicitarSuaPropriaCarona() throws Exception {
+        Usuario motorista = new Usuario(1L, "Motorista", "m@teste.com", "senha123", TipoUsuario.MOTORISTA);
+        motorista.setCnh("111");
+        motorista.setModeloVeiculo("Modelo");
+        motorista.setCorVeiculo("Cor");
+        motorista.setPlacaVeiculo("XXX-0001");
+        usuarioRepo.salvar(motorista);
+
+        LocalDateTime saida = LocalDateTime.now().plusHours(4);
+        Carona carona = service.cadastrarCarona(motorista.getId(), "Unisinos São Leopoldo", "Centro POA", saida, 3);
+
+        CaronaService.CaronaException exception = assertThrows(
+            CaronaService.CaronaException.class,
+            () -> service.solicitarVaga(motorista.getId(), carona.getId())
+        );
+
+        assertTrue(exception.getMessage().contains("não pode solicitar"));
+        assertTrue(reservaRepo.listarPorPassageiro(motorista.getId()).isEmpty());
+    }
+
+    @Test
     void fluxoSolicitacaoAprovacaoCompleto() throws Exception {
         Usuario motorista = new Usuario(1L, "Motorista", "m@teste.com", "senha123", TipoUsuario.MOTORISTA);
         motorista.setCnh("111");

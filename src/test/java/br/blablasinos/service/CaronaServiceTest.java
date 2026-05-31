@@ -46,18 +46,19 @@ class CaronaServiceTest {
     @Test
     void deveCadastrarCaronaComDadosValidos() throws CaronaService.CaronaException, SQLException {
         LocalDateTime saida = LocalDateTime.now().plusHours(2);
-        Carona carona = service.cadastrarCarona(motorista.getId(), "Unisinos São Leopoldo", "Centro POA", saida, 3);
-        
+        Carona carona = service.cadastrarCarona(motorista.getId(), "Unisinos São Leopoldo", "Centro POA", saida, 3, 12.5);
+
         assertNotNull(carona);
         assertNotNull(carona.getId());
         assertEquals(motorista.getId(), carona.getMotoristaId());
+        assertEquals(12.5, carona.getValor(), 0.001);
     }
 
     @Test
     void deveReprovarCaronaNoMesmoHorario_RN02_4() throws CaronaService.CaronaException, SQLException {
         LocalDateTime saida = LocalDateTime.now().plusHours(3);
         // 1. Cadastra a primeira carona válida
-        service.cadastrarCarona(motorista.getId(), "Unisinos", "Centro", saida, 3);
+        service.cadastrarCarona(motorista.getId(), "Campus São Leopoldo", "Centro", saida, 3);
 
         // 2. Tenta cadastrar a segunda carona com horário conflitante e LOCALIZAÇÃO VÁLIDA
         CaronaService.CaronaException e = assertThrows(CaronaService.CaronaException.class, () -> {

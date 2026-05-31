@@ -45,19 +45,55 @@ public class CaronaServiceRulesTest {
         LocalDateTime saida = LocalDateTime.now().plusHours(2);
 
         CaronaService.CaronaException e1 = assertThrows(CaronaService.CaronaException.class, () ->
-                service.cadastrarCarona(motorista.getId(), "Unisinos", "Porto Alegre", saida, 0)
+                service.cadastrarCarona(motorista.getId(), "Campus São Leopoldo", "Porto Alegre", saida, 0)
         );
         assertTrue(e1.getMessage().contains("O número de vagas deve ser entre"));
 
         CaronaService.CaronaException e2 = assertThrows(CaronaService.CaronaException.class, () ->
-                service.cadastrarCarona(motorista.getId(), "Unisinos", "Porto Alegre", saida, 5)
+                service.cadastrarCarona(motorista.getId(), "Campus São Leopoldo", "Porto Alegre", saida, 5)
         );
         assertTrue(e2.getMessage().contains("O número de vagas deve ser entre"));
     }
 
     @Test
-    void deveReprovarCampusInvalido() throws SQLException {
+    void deveReprovarCampusGenericoSemNomeDoCampus() throws SQLException {
         Usuario motorista = new Usuario(2L, "M2", "m2@teste.com", "senha123", TipoUsuario.MOTORISTA);
+        motorista.setCnh("123");
+        motorista.setModeloVeiculo("X");
+        motorista.setCorVeiculo("C");
+        motorista.setPlacaVeiculo("P");
+        inMemoryUsuarioRepo.salvar(motorista);
+
+        LocalDateTime saida = LocalDateTime.now().plusHours(3);
+
+        CaronaService.CaronaException e = assertThrows(CaronaService.CaronaException.class, () ->
+                service.cadastrarCarona(motorista.getId(), "Unisinos", "Centro", saida, 2)
+        );
+
+        assertTrue(e.getMessage().contains("não apenas 'Unisinos'"));
+    }
+
+    @Test
+    void deveReprovarUnisinosSemCampusNoMesmoCampo() throws SQLException {
+        Usuario motorista = new Usuario(3L, "M3", "m3@teste.com", "senha123", TipoUsuario.MOTORISTA);
+        motorista.setCnh("123");
+        motorista.setModeloVeiculo("X");
+        motorista.setCorVeiculo("C");
+        motorista.setPlacaVeiculo("P");
+        inMemoryUsuarioRepo.salvar(motorista);
+
+        LocalDateTime saida = LocalDateTime.now().plusHours(3);
+
+        CaronaService.CaronaException e = assertThrows(CaronaService.CaronaException.class, () ->
+                service.cadastrarCarona(motorista.getId(), "Unisinos", "Centro Porto Alegre", saida, 2)
+        );
+
+        assertTrue(e.getMessage().contains("não apenas 'Unisinos'"));
+    }
+
+    @Test
+    void deveReprovarCampusInvalido() throws SQLException {
+        Usuario motorista = new Usuario(4L, "M4", "m4@teste.com", "senha123", TipoUsuario.MOTORISTA);
         motorista.setCnh("123");
         motorista.setModeloVeiculo("X");
         motorista.setCorVeiculo("C");
@@ -84,7 +120,7 @@ public class CaronaServiceRulesTest {
         LocalDateTime passada = LocalDateTime.now().minusHours(1);
 
         CaronaService.CaronaException e = assertThrows(CaronaService.CaronaException.class, () ->
-                service.cadastrarCarona(motorista.getId(), "Unisinos", "Centro", passada, 2)
+                service.cadastrarCarona(motorista.getId(), "Campus São Leopoldo", "Centro", passada, 2)
         );
         assertTrue(e.getMessage().contains("O horário de saída deve ser posterior"));
     }
@@ -97,7 +133,7 @@ public class CaronaServiceRulesTest {
         LocalDateTime saida = LocalDateTime.now().plusHours(2);
 
         CaronaService.CaronaException e1 = assertThrows(CaronaService.CaronaException.class, () ->
-                service.cadastrarCarona(passageiro.getId(), "Unisinos", "Centro", saida, 2)
+                service.cadastrarCarona(passageiro.getId(), "Campus São Leopoldo", "Centro", saida, 2)
         );
         assertTrue(e1.getMessage().contains("Apenas usuários com perfil Motorista"));
 
@@ -105,7 +141,7 @@ public class CaronaServiceRulesTest {
         inMemoryUsuarioRepo.salvar(motorista);
 
         CaronaService.CaronaException e2 = assertThrows(CaronaService.CaronaException.class, () ->
-                service.cadastrarCarona(motorista.getId(), "Unisinos", "Centro", saida, 2)
+                service.cadastrarCarona(motorista.getId(), "Campus São Leopoldo", "Centro", saida, 2)
         );
         assertTrue(e2.getMessage().contains("perfil de motorista está incompleto"));
     }
