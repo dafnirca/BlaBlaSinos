@@ -6,7 +6,7 @@ Conecta motoristas e passageiros da comunidade Unisinos — alunos, professores 
 
 **Disciplina:** Implementação de Software — Unisinos  
 **Equipe:** Dafni Rosa · Gabriel Kaiper · Jordano Rodrigues  
-**Status:** 🟡 Em desenvolvimento (Sprint 1)
+**Status:** 🟡 Em desenvolvimento (Sprint 4)
 
 ---
 
@@ -63,8 +63,8 @@ Antes de configurar o projeto, certifique-se de ter instalado:
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/caronas-unisinos.git
-cd caronas-unisinos
+git clone https://github.com/dafnirca/BlaBlaSinos.git
+cd blablasinos
 ```
 
 ### 2. Fazer checkout na branch de desenvolvimento
@@ -84,14 +84,14 @@ Isso irá baixar as dependências declaradas no `pom.xml` (incluindo `sqlite-jdb
 ### 4. Executar a aplicação
 
 ```bash
-mvn exec:java -Dexec.mainClass="br.unisinos.caronas.Main"
+mvn exec:java -Dexec.mainClass="br.blablasinos.Main"
 ```
 
 Ou, se preferir gerar o JAR executável primeiro:
 
 ```bash
 mvn package
-java -jar target/caronas-unisinos-1.0-SNAPSHOT.jar
+java -jar target/blablasinos-1.0-SNAPSHOT.jar
 ```
 
 Na primeira execução, o sistema criará automaticamente o arquivo de banco de dados `caronas.db` na raiz do projeto e aplicará o schema inicial (`src/main/resources/schema.sql`).
@@ -109,23 +109,26 @@ Os testes unitários ficam em `src/test/java/` e cobrem as camadas `service/` e 
 ## Estrutura do projeto
 
 ```
-caronas-unisinos/
+blablasinos/
 ├── src/
 │   ├── main/
-│   │   ├── java/br/unisinos/caronas/
-│   │   │   ├── config/        # DatabaseConfig, AppConfig
+│   │   ├── java/br/blablasinos/
+│   │   │   ├── exception/     # Falha de validação de usuário
+│   │   │   ├── handler/       # Controladores MVC
 │   │   │   ├── model/         # Entidades: Usuario, Carona, Reserva
 │   │   │   ├── repository/    # Acesso ao SQLite via JDBC
 │   │   │   ├── service/       # Regras de negócio (casos de uso)
-│   │   │   ├── handler/       # Controladores MVC
+│   │   │   ├── validation/    # Validação de usuários
 │   │   │   └── view/          # Interfaces gráficas (Swing)
 │   │   └── resources/
+│   │       ├── static/        # Front-End
 │   │       ├── schema.sql     # DDL do banco de dados
 │   │       └── app.properties
 │   └── test/
-│       └── java/br/unisinos/caronas/
+│       └── java/br/blablasinos/
+│           ├── repository/    # Testes de integração
 │           ├── service/       # Testes unitários
-│           └── repository/    # Testes de integração
+│           └── validation/    # Testes de validação de cadastro
 └── docs/                      # Diagramas e documentação técnica
 ```
 
@@ -149,10 +152,10 @@ Consulte a seção **Fluxo de Pull Requests** no README para o passo a passo com
 
 | Sprint | Foco | Status |
 |--------|------|--------|
-| Sprint 1 | Planejamento — escopo, ambiente, modelagem e documentação base | 🟡 Em andamento |
-| Sprint 2 | Núcleo funcional — autenticação, cadastro de caronas e persistência | ⬜ Aguardando |
-| Sprint 3 | Funcionalidades completas — fluxo do passageiro, notificações e testes | ⬜ Aguardando |
-| Sprint 4 | Entrega final — polimento, documentação técnica e apresentação | ⬜ Aguardando |
+| Sprint 1 | Planejamento — escopo, ambiente, modelagem e documentação base | ✅ Em andamento |
+| Sprint 2 | Núcleo funcional — autenticação, cadastro de caronas e persistência | ✅ Aguardando |
+| Sprint 3 | Funcionalidades completas — fluxo do passageiro, notificações e testes | ✅ Aguardando |
+| Sprint 4 | Entrega final — polimento, documentação técnica e apresentação | 🟡 Aguardando |
 
 ---
 
