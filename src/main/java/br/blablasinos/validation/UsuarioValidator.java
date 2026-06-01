@@ -5,7 +5,7 @@ import br.blablasinos.model.Usuario;
 
 public final class UsuarioValidator {
 
-    private static final String EMAIL_PATTERN = "^[^@\\s]+@edu\\.unisinos\\.br$";
+    private static final String EMAIL_PATTERN = "^[^@\\s]+@(?:edu\\.)?unisinos\\.br$";
 
     private UsuarioValidator() {
     }
@@ -36,7 +36,7 @@ public final class UsuarioValidator {
 
         if (!emailNormalizado.matches(EMAIL_PATTERN)) {
             throw new UsuarioValidationException(
-                "E-mail deve ser institucional com domínio @edu.unisinos.br.");
+                "E-mail deve ser institucional com domínio @unisinos.br ou @edu.unisinos.br.");
         }
     }
 

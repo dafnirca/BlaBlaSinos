@@ -37,3 +37,14 @@ CREATE TABLE IF NOT EXISTS reservas (
     FOREIGN KEY (carona_id) REFERENCES caronas (id),
     FOREIGN KEY (passageiro_id) REFERENCES usuarios (id)
 );
+
+CREATE TABLE IF NOT EXISTS notificacoes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id INTEGER NOT NULL,
+    tipo TEXT NOT NULL,
+    mensagem TEXT NOT NULL,
+    referencia_id INTEGER,
+    lida INTEGER NOT NULL DEFAULT 0,
+    criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+);
