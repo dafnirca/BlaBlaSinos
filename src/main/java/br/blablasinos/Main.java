@@ -21,19 +21,16 @@ public class Main {
         server.createContext("/api/cadastro", new CadastroHandler());
         server.createContext("/api/login", new LoginHandler());
         server.createContext("/api/perfil", new PerfilHandler());
-        server.createContext("/api/caronas", new CaronaHandler()); // << ESTA LINHA CORRIGE O PROBLEMA
+        server.createContext("/api/avaliacoes", new br.blablasinos.handler.AvaliacaoHandler());
+        server.createContext("/api/caronas", new CaronaHandler()); 
         server.createContext("/api/solicitacoes", new SolicitacaoHandler());
         server.createContext("/api/notificacoes", new NotificacaoHandler());
 
-        // === ROTA PARA ARQUIVOS ESTÁTICOS (a mais geral, por último) ===
-        // Qualquer outra URL que não seja uma das APIs acima será tratada como um arquivo.
         server.createContext("/", new StaticFileHandler());
 
         server.setExecutor(null);
         server.start();
 
-        System.out.println("BlaBlaSinos iniciado!");
-        System.out.println("Servidor escutando na porta " + port);
-        System.out.println("Acesse: http://localhost:" + port + "/login.html");
+        // Server started
     }
 }

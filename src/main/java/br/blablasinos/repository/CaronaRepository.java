@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import br.blablasinos.model.Carona;
+import br.blablasinos.model.StatusCarona;
 
 public class CaronaRepository {
 
@@ -20,7 +21,7 @@ public class CaronaRepository {
     public CaronaRepository(String jdbcUrl) {
         this.url = jdbcUrl;
         try {
-            // ESTA É A CORREÇÃO: Garante que a tabela seja criada ao iniciar.
+            // ensure table exists on initialization
             criarTabela();
         } catch (SQLException e) {
             throw new RuntimeException("Falha ao inicializar e criar tabela de caronas.", e);
@@ -40,7 +41,7 @@ public class CaronaRepository {
                 vagas_disponiveis INTEGER NOT NULL,
                 valor             REAL    NOT NULL DEFAULT 0,
                 observacoes       TEXT    DEFAULT '',
-                status            TEXT    NOT NULL DEFAULT 'ATIVA',
+                status            TEXT    NOT NULL DEFAULT 'AGENDADA',
                 criado_em         TEXT    NOT NULL,
                 FOREIGN KEY (motorista_id) REFERENCES usuarios(id)
             );
@@ -54,6 +55,12 @@ public class CaronaRepository {
                     stmt.execute("ALTER TABLE caronas ADD COLUMN valor REAL NOT NULL DEFAULT 0");
                 }
             }
+            try (ResultSet columns = conn.getMetaData().getColumns(null, null, "caronas", "status")) {
+                if (!columns.next()) {
+                    stmt.execute("ALTER TABLE caronas ADD COLUMN status TEXT NOT NULL DEFAULT 'AGENDADA'");
+                }
+            }
+            stmt.execute("UPDATE caronas SET status = 'AGENDADA' WHERE status IS NULL OR status = ''");
         }
     }
 
@@ -77,7 +84,7 @@ public class CaronaRepository {
             ps.setInt   (6, carona.getVagasDisponiveis());
             ps.setDouble(7, carona.getValor());
             ps.setString(8, ""); // observacoes padrão
-            ps.setString(9, "ATIVA"); // status padrão
+            ps.setString(9, carona.getStatus().name());
             ps.setString(10, LocalDateTime.now().toString()); // criado_em
 
             ps.executeUpdate();
@@ -108,7 +115,7 @@ public class CaronaRepository {
     public List<Carona> listarAtivas(String destino, String data) throws SQLException {
         StringBuilder sql = new StringBuilder("""
             SELECT * FROM caronas
-            WHERE status = 'ATIVA'
+            WHERE status = 'AGENDADA'
               AND vagas_disponiveis > 0
               AND horario_saida > ?
             """);
@@ -167,7 +174,7 @@ public class CaronaRepository {
         String sql = """
             SELECT COUNT(*) FROM caronas
             WHERE motorista_id = ?
-              AND status = 'ATIVA'
+              AND status IN ('AGENDADA', 'ATIVA')
               AND ABS(CAST((julianday(horario_saida) - julianday(?)) * 24 * 60 AS INTEGER)) < 60
             """;
 
@@ -188,7 +195,7 @@ public class CaronaRepository {
             SELECT COUNT(*) FROM caronas
             WHERE motorista_id = ?
               AND id <> ?
-              AND status = 'ATIVA'
+              AND status IN ('AGENDADA', 'ATIVA')
               AND ABS(CAST((julianday(horario_saida) - julianday(?)) * 24 * 60 AS INTEGER)) < 60
             """;
 
@@ -241,6 +248,42 @@ public class CaronaRepository {
         }
     }
 
+    public void atualizarStatus(Long caronaId, StatusCarona status) throws SQLException {
+        String sql = "UPDATE caronas SET status = ? WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status.name());
+            ps.setLong(2, caronaId);
+
+            int linhas = ps.executeUpdate();
+            if (linhas == 0) {
+                throw new SQLException("Carona com id=" + caronaId + " não encontrada.");
+            }
+        }
+    }
+
+    public int ativarAgendadasVencidasComReservaConfirmada(LocalDateTime agora) throws SQLException {
+        String sql = """
+            UPDATE caronas
+            SET status = 'ATIVA'
+            WHERE status = 'AGENDADA'
+              AND horario_saida <= ?
+              AND EXISTS (
+                  SELECT 1 FROM reservas r
+                  WHERE r.carona_id = caronas.id
+                    AND r.status = 'CONFIRMADA'
+              )
+            """;
+
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, agora.toString());
+            return ps.executeUpdate();
+        }
+    }
+
     public void atualizar(Carona carona) throws SQLException {
         String sql = """
             UPDATE caronas
@@ -251,7 +294,7 @@ public class CaronaRepository {
         try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, "ATIVA"); 
+            ps.setString(1, carona.getStatus().name()); 
             ps.setInt   (2, carona.getVagasDisponiveis());
             ps.setLong  (3, carona.getId());
 
@@ -272,7 +315,8 @@ public class CaronaRepository {
             LocalDateTime.parse(rs.getString("horario_saida")),
             rs.getInt   ("vagas_disponiveis"),
             rs.getInt   ("vagas_total"),
-            rs.getDouble("valor")
+            rs.getDouble("valor"),
+            StatusCarona.valueOf(rs.getString("status"))
         );
     }
 }

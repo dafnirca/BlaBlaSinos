@@ -44,6 +44,7 @@ async function carregarPerfil() {
             minhasCaronasLink.classList.add('hidden');
         }
         toggleMotoristaFields();
+        carregarAvaliacoes(usuario.id);
 
     } catch (error) {
         console.error('Falha ao carregar dados do perfil:', error);
@@ -86,3 +87,30 @@ async function salvarPerfil(event) {
 window.addEventListener('load', carregarPerfil);
 motoristaCheckbox.addEventListener('change', toggleMotoristaFields);
 perfilForm.addEventListener('submit', salvarPerfil);
+
+async function carregarAvaliacoes(userId) {
+    try {
+        const resp = await fetch(`/api/avaliacoes?usuarioId=${encodeURIComponent(userId)}`);
+        const container = document.getElementById('resumo-avaliacoes');
+        if (!resp.ok) { container.textContent = 'Não foi possível carregar avaliações.'; return; }
+        const resumo = await resp.json();
+        // Resumo esperado: { media: X, quantidade: N, comentarios: [ {avaliadorId, nota, comentario, dataHora} ] }
+        container.innerHTML = '';
+        const media = document.createElement('p');
+        media.innerHTML = `<strong>Média:</strong> ${resumo.media ? resumo.media.toFixed(2) : '0.00'} (${resumo.quantidade || 0} avaliações)`;
+        container.appendChild(media);
+        if (resumo.comentarios && resumo.comentarios.length > 0) {
+            const ul = document.createElement('ul');
+            resumo.comentarios.forEach(c => {
+                const li = document.createElement('li');
+                li.textContent = `Nota: ${c.nota} — ${c.comentario || ''}`;
+                ul.appendChild(li);
+            });
+            container.appendChild(ul);
+        } else {
+            const p = document.createElement('p'); p.textContent = 'Sem comentários por enquanto.'; container.appendChild(p);
+        }
+    } catch (err) {
+        console.error('Erro ao carregar avaliacoes', err);
+    }
+}

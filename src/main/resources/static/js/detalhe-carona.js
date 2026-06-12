@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('Erro ao carregar motorista:', err);
                 document.getElementById('motorista-nome').textContent = 'Motorista';
             }
+            return carona;
         } catch (error) {
             console.error('Erro ao carregar detalhes da carona:', error);
         }
@@ -153,10 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            // ==================================================================
-            // === ESTA É A CORREÇÃO FINAL ===
-            // ==================================================================
-            // A URL agora envia 'reservaId' e 'passageiroId', como o backend espera.
+            // Envia pedido de cancelamento da reserva para o backend
             const response = await fetch(`/api/solicitacoes?reservaId=${reservaId}&passageiroId=${passageiroId}`, { 
                 method: 'DELETE' 
             });
@@ -181,7 +179,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnCancelar.addEventListener('click', cancelarSolicitacao);
 
     // Carrega dados da carona e do motorista, depois o status da reserva
-    await carregarDetalhesCarona();
+    const carona = await carregarDetalhesCarona();
     await carregarStatusReserva();
+    // Se a carona estiver concluída e o usuário for passageiro confirmado, permite avaliar motorista
+    try {
+        if (carona && carona.status === 'CONCLUIDA') {
+            const passageiroId = localStorage.getItem('userId');
+            if (passageiroId) {
+                // Verifica se este passageiro teve reserva confirmada nesta carona
+                const resp = await fetch(`/api/solicitacoes?passageiroId=${encodeURIComponent(passageiroId)}`);
+                if (resp.ok) {
+                    const reservas = await resp.json();
+                    const minha = reservas.find(r => String(r.caronaId) === String(caronaId) && r.status === 'CONFIRMADA');
+                    if (minha) {
+                        const area = document.getElementById('avaliacao-area');
+                        area.innerHTML = '';
+                        const btnAvaliar = document.createElement('button');
+                        btnAvaliar.textContent = 'Avaliar Motorista';
+                        btnAvaliar.className = 'btn-principal';
+                        btnAvaliar.addEventListener('click', async () => {
+                            const notaStr = prompt('Informe a nota para o motorista (1-5):', '5');
+                            const nota = parseInt(notaStr);
+                            if (isNaN(nota) || nota < 1 || nota > 5) { alert('Nota inválida'); return; }
+                            const comentario = prompt('Comentário (opcional):', '');
+                            try {
+                                const post = await fetch('/api/avaliacoes', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ caronaId: parseInt(caronaId), avaliadorId: parseInt(passageiroId), avaliadoId: parseInt(carona.motoristaId), nota: nota, comentario: comentario })
+                                });
+                                const res = await post.json();
+                                if (!post.ok) throw new Error(res.error || 'Erro ao enviar avaliação');
+                                alert('Avaliação enviada com sucesso.');
+                                area.innerHTML = '';
+                            } catch (err) {
+                                alert('Erro: ' + err.message);
+                            }
+                        });
+                        area.appendChild(btnAvaliar);
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Erro ao preparar avaliação:', err);
+    }
     setInterval(carregarStatusReserva, 5000);
 });

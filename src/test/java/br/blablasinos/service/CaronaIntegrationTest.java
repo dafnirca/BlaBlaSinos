@@ -192,6 +192,13 @@ public class CaronaIntegrationTest {
         public List<Reserva> listarPorPassageiro(long passageiroId) {
             return db.values().stream().filter(r -> r.getPassageiroId() == passageiroId).toList();
         }
+
+        @Override
+        public List<Reserva> listarConfirmadasPorCarona(long caronaId) {
+            return db.values().stream()
+                .filter(r -> r.getCaronaId() == caronaId && "CONFIRMADA".equals(r.getStatus()))
+                .toList();
+        }
     }
 
     static class InMemoryUsuarioRepository implements UsuarioRepository {
@@ -289,6 +296,13 @@ public class CaronaIntegrationTest {
             return db.values().stream().anyMatch(c -> !c.getId().equals(caronaId)
                     && c.getMotoristaId().equals(motoristaId)
                     && Math.abs(java.time.Duration.between(c.getDataHora(), horario).toMinutes()) < 60);
+        }
+
+        @Override
+        public int ativarAgendadasVencidasComReservaConfirmada(java.time.LocalDateTime agora) {
+            // Test fake: noop — evitar acesso ao SQLite usado pela implementação real.
+            // Retorna o número de caronas ativadas (0) para manter comportamento neutro.
+            return 0;
         }
     }
 }

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS caronas (
     vagas_disponiveis INTEGER NOT NULL,
     valor REAL NOT NULL DEFAULT 0,
     observacoes TEXT DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'ATIVA',
+    status TEXT NOT NULL DEFAULT 'AGENDADA',
     criado_em TEXT NOT NULL,
     FOREIGN KEY (motorista_id) REFERENCES usuarios (id)
 );
@@ -47,4 +47,18 @@ CREATE TABLE IF NOT EXISTS notificacoes (
     lida INTEGER NOT NULL DEFAULT 0,
     criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+);
+
+CREATE TABLE IF NOT EXISTS avaliacoes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    carona_id INTEGER NOT NULL,
+    avaliador_id INTEGER NOT NULL,
+    avaliado_id INTEGER NOT NULL,
+    nota INTEGER NOT NULL,
+    comentario TEXT DEFAULT '',
+    data_avaliacao TEXT NOT NULL,
+    UNIQUE(carona_id, avaliador_id, avaliado_id),
+    FOREIGN KEY (carona_id) REFERENCES caronas (id),
+    FOREIGN KEY (avaliador_id) REFERENCES usuarios (id),
+    FOREIGN KEY (avaliado_id) REFERENCES usuarios (id)
 );

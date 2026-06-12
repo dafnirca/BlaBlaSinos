@@ -75,6 +75,9 @@ async function renderHeader() {
     if (motorista) {
         nav.appendChild(createNavLink('gerenciar-caronas.html', 'Minhas Caronas', currentPage));
         nav.appendChild(createNavLink('solicitacoes.html', 'Solicitacoes', currentPage));
+    } else {
+        // Passageiro: link para acompanhar viagens
+        nav.appendChild(createNavLink('minhas-viagens.html', 'Minhas Viagens', currentPage));
     }
 
     const actions = document.createElement('div');
