@@ -39,7 +39,7 @@ public class UsuarioValidatorTest {
             () -> UsuarioValidator.validar(usuario)
         );
 
-        assertEquals("E-mail deve ser institucional com domínio @edu.unisinos.br.", exception.getMessage());
+        assertEquals("E-mail deve ser institucional com domínio @unisinos.br ou @edu.unisinos.br.", exception.getMessage());
     }
 
     @Test

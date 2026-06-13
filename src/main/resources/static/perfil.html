@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlaBlaSinos - Perfil</title>
     <link rel="stylesheet" href="css/perfil.css">
+    <link rel="stylesheet" href="css/header.css">
 </head>
 <body>
+    <div id="site-header"></div>
     <div class="perfil-container">
         <h1>Meu Perfil</h1>
         <form id="perfil-form">
@@ -49,6 +51,11 @@
                 </div>
             </div>
 
+            <div class="card" id="avaliacoes-recebidas">
+                <h2>Avaliações Recebidas</h2>
+                <div id="resumo-avaliacoes">Carregando avaliações...</div>
+            </div>
+
             <button type="submit">Salvar Alterações</button>
             <div class="actions-container">
                 <a href="buscar-caronas.html" class="action-link">Buscar caronas</a>
@@ -57,6 +64,7 @@
         </form>
     </div>
     <script src="js/notifications.js"></script>
+    <script src="js/header.js"></script>
     <script src="js/perfil.js"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@ public class SqliteReservaRepository implements ReservaRepository {
 
     public SqliteReservaRepository() {
         this.databaseUrl = "jdbc:sqlite:caronas.db";
-        // ESTA É A CORREÇÃO: Garante que a tabela 'reservas' seja criada ao iniciar.
+        // ensure reservas table exists
         criarTabelaSeNecessario();
     }
 
@@ -171,6 +171,30 @@ public class SqliteReservaRepository implements ReservaRepository {
             return reservas;
         } catch (SQLException e) {
             throw new RuntimeException("Falha ao listar reservas do passageiro.", e);
+        }
+    }
+
+    @Override
+    public List<Reserva> listarConfirmadasPorCarona(long caronaId) {
+        String sql = "SELECT * FROM reservas WHERE carona_id = ? AND status = 'CONFIRMADA' ORDER BY id DESC";
+        try (Connection conn = criarConexao();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, caronaId);
+            ResultSet rs = pstmt.executeQuery();
+
+            java.util.List<Reserva> reservas = new java.util.ArrayList<>();
+            while (rs.next()) {
+                Reserva reserva = new Reserva(
+                    rs.getLong("id"),
+                    rs.getLong("carona_id"),
+                    rs.getLong("passageiro_id"),
+                    rs.getString("status")
+                );
+                reservas.add(reserva);
+            }
+            return reservas;
+        } catch (SQLException e) {
+            throw new RuntimeException("Falha ao listar reservas confirmadas da carona.", e);
         }
     }
 }

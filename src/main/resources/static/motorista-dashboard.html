@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlaBlaSinos - Dashboard do Motorista</title>
+    <link rel="stylesheet" href="css/header.css">
     <style>
         * {
             margin: 0;
@@ -147,6 +148,7 @@
     </style>
 </head>
 <body>
+    <div id="site-header"></div>
     <div class="dashboard-container">
         <div class="header">
             <h1>🚗 Dashboard do Motorista</h1>
@@ -179,12 +181,9 @@
             </a>
         </div>
 
-        <div class="logout-section">
-            <a href="perfil.html" class="perfil-btn">← Voltar ao Perfil</a>
-            <button class="logout-btn" onclick="logout()">Sair</button>
-        </div>
     </div>
 
+    <script src="js/header.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const motoristaId = localStorage.getItem('userId');

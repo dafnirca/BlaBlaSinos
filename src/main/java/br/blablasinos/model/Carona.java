@@ -11,6 +11,7 @@ public class Carona {
     private int vagasDisponiveis;
     private int vagasTotais;
     private double valor;
+    private StatusCarona status = StatusCarona.AGENDADA;
 
     public Carona() {}
 
@@ -29,6 +30,13 @@ public class Carona {
         this.vagasDisponiveis = vagasDisponiveis;
         this.vagasTotais = vagasTotais;
         this.valor = valor;
+        this.status = StatusCarona.AGENDADA;
+    }
+
+    public Carona(Long id, Long motoristaId, String origem, String destino, LocalDateTime dataHora,
+                  int vagasDisponiveis, int vagasTotais, double valor, StatusCarona status) {
+        this(id, motoristaId, origem, destino, dataHora, vagasDisponiveis, vagasTotais, valor);
+        this.status = status == null ? StatusCarona.AGENDADA : status;
     }
 
     public Long getId() { return id; }
@@ -47,4 +55,6 @@ public class Carona {
     public void setVagasTotais(int vagasTotais) { this.vagasTotais = vagasTotais; }
     public double getValor() { return valor; }
     public void setValor(double valor) { this.valor = valor; }
+    public StatusCarona getStatus() { return status; }
+    public void setStatus(StatusCarona status) { this.status = status == null ? StatusCarona.AGENDADA : status; }
 }

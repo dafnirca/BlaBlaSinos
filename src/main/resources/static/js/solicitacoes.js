@@ -15,19 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnConfirmar = document.getElementById('btn-confirmar');
     const btnCancelarModal = document.getElementById('btn-cancelar-modal');
     const modalMensagem = document.getElementById('modal-mensagem');
-    const btnLogout = document.getElementById('btn-logout');
 
     let decisioPendente = null;
     let pendingSolicitacoesCache = new Set();
     let firstLoad = true;
-
-    // Logout
-    btnLogout.addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userEmail');
-        window.location.href = 'login.html';
-    });
 
     // Carrega as solicitações pendentes
     async function carregarSolicitacoes() {

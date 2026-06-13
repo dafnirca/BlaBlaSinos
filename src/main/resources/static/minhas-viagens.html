@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlaBlaSinos - Minhas Viagens</title>
+    <link rel="stylesheet" href="css/gerenciar-caronas.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/notifications.css">
+</head>
+<body>
+    <div id="site-header"></div>
+    <div class="main-container">
+        <h1>Minhas Viagens</h1>
+        <div class="card">
+            <div class="card-header">
+                <h2>Viagens Confirmadas</h2>
+            </div>
+            <div class="table-wrapper">
+                <table id="viagens-table" class="hidden">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Origem</th>
+                            <th>Destino</th>
+                            <th>Motorista</th>
+                            <th>Status</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="viagens-list"></tbody>
+                </table>
+                <p id="empty-state" class="empty-state">Você não possui viagens confirmadas.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/minhas-viagens.js"></script>
+</body>
+</html>

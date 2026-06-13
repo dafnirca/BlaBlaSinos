@@ -174,6 +174,11 @@ public class CaronaServiceRulesTest {
         public java.util.List<br.blablasinos.model.Reserva> listarPorPassageiro(long passageiroId) {
             return java.util.List.of();
         }
+
+        @Override
+        public java.util.List<br.blablasinos.model.Reserva> listarConfirmadasPorCarona(long caronaId) {
+            return java.util.List.of();
+        }
     }
 
     static class InMemoryUsuarioRepository implements UsuarioRepository {
@@ -271,6 +276,11 @@ public class CaronaServiceRulesTest {
             return db.values().stream().anyMatch(c -> !c.getId().equals(caronaId)
                     && c.getMotoristaId().equals(motoristaId)
                     && Math.abs(java.time.Duration.between(c.getDataHora(), horario).toMinutes()) < 60);
+        }
+
+        @Override
+        public int ativarAgendadasVencidasComReservaConfirmada(java.time.LocalDateTime agora) {
+            return 0;
         }
     }
 }

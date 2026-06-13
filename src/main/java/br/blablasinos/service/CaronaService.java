@@ -6,6 +6,7 @@ import java.util.List;
 
 import br.blablasinos.model.Carona;
 import br.blablasinos.model.Reserva;
+import br.blablasinos.model.StatusCarona;
 import br.blablasinos.model.TipoUsuario;
 import br.blablasinos.model.Usuario;
 import br.blablasinos.repository.CaronaRepository;
@@ -26,12 +27,18 @@ public class CaronaService {
     private final CaronaRepository  caronaRepo;
     private final UsuarioRepository usuarioRepo;
     private final ReservaRepository reservaRepo;
+    private final NotificacaoService notificacaoService;
 
     // Construtor para testes
     public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo, ReservaRepository reservaRepo) {
+        this(caronaRepo, usuarioRepo, reservaRepo, new NotificacaoService());
+    }
+
+    public CaronaService(CaronaRepository caronaRepo, UsuarioRepository usuarioRepo, ReservaRepository reservaRepo, NotificacaoService notificacaoService) {
         this.caronaRepo  = caronaRepo;
         this.usuarioRepo = usuarioRepo;
         this.reservaRepo = reservaRepo;
+        this.notificacaoService = notificacaoService;
     }
 
     // Construtor padrão que os Handlers usam
@@ -39,6 +46,7 @@ public class CaronaService {
         this.caronaRepo = new CaronaRepository("jdbc:sqlite:caronas.db");
         this.usuarioRepo = new SqliteUsuarioRepository();
         this.reservaRepo = new SqliteReservaRepository();
+        this.notificacaoService = new NotificacaoService();
     }
 
 
@@ -80,6 +88,7 @@ public class CaronaService {
         carona.setVagasTotais(vagasTotais);
         carona.setVagasDisponiveis(vagasTotais);
         carona.setValor(valor);
+        carona.setStatus(StatusCarona.AGENDADA);
 
         caronaRepo.salvar(carona);   
         return carona;
@@ -142,15 +151,18 @@ public class CaronaService {
         Carona carona = buscarCaronaDoMotorista(motoristaId, caronaId);
         validarEdicaoPermitida(carona);   
 
-        caronaRepo.deletar(caronaId);
+        carona.setStatus(StatusCarona.CANCELADA);
+        caronaRepo.atualizarStatus(caronaId, StatusCarona.CANCELADA);
     }
 
 
     public List<Carona> listarMinhasCaronas(Long motoristaId) throws SQLException {
+        atualizarStatusCaronas();
         return caronaRepo.listarPorMotorista(motoristaId);
     }
 
     public List<Carona> buscarCaronasDisponiveis(String destino, String data) throws SQLException {
+        atualizarStatusCaronas();
         return caronaRepo.listarAtivas(destino, data);
     }
 
@@ -172,7 +184,14 @@ public class CaronaService {
         novaReserva.setCaronaId(caronaId);
         novaReserva.setStatus("PENDENTE");
 
-        return reservaRepo.salvar(novaReserva);
+        Reserva reservaCriada = reservaRepo.salvar(novaReserva);
+        notificarUsuario(
+            carona.getMotoristaId(),
+            "NOVA_SOLICITACAO",
+            "Voce recebeu uma nova solicitacao para a carona #" + caronaId + ".",
+            reservaCriada.getId()
+        );
+        return reservaCriada;
     }
 
     public List<Reserva> listarSolicitacoesPendentes(Long motoristaId) throws SQLException {
@@ -184,6 +203,7 @@ public class CaronaService {
     }
 
     public Carona buscarCaronaPorId(Long caronaId) throws CaronaException, SQLException {
+        atualizarStatusCaronas();
         return caronaRepo.buscarPorId(caronaId)
                 .orElseThrow(() -> new CaronaException("Carona não encontrada (id=" + caronaId + ")."));
     }
@@ -204,6 +224,7 @@ public class CaronaService {
                 throw new CaronaException("Não há vagas disponíveis para confirmar esta solicitação.");
             }
             carona.setVagasDisponiveis(carona.getVagasDisponiveis() - 1);
+            carona.setStatus(StatusCarona.AGENDADA);
             caronaRepo.atualizar(carona);
             reserva.setStatus("CONFIRMADA");
         } else {
@@ -211,7 +232,16 @@ public class CaronaService {
         }
 
         reservaRepo.update(reserva);
+        String tipo = aceitar ? "SOLICITACAO_ACEITA" : "SOLICITACAO_RECUSADA";
+        String mensagem = aceitar
+            ? "Sua solicitacao da carona #" + carona.getId() + " foi aceita."
+            : "Sua solicitacao da carona #" + carona.getId() + " foi recusada.";
+        notificarUsuario(reserva.getPassageiroId(), tipo, mensagem, reserva.getId());
         return reserva;
+    }
+
+    private void notificarUsuario(Long usuarioId, String tipo, String mensagem, Long referenciaId) {
+        notificacaoService.notificar(usuarioId, tipo, mensagem, referenciaId);
     }
 
     public void cancelarSolicitacao(Long passageiroId, Long reservaId) throws CaronaException, SQLException {
@@ -233,7 +263,27 @@ public class CaronaService {
         reservaRepo.deletar(reservaId);
     }
 
+    public void atualizarStatusCaronas() throws SQLException {
+        caronaRepo.ativarAgendadasVencidasComReservaConfirmada(LocalDateTime.now());
+    }
+
+    public Carona concluirCarona(Long motoristaId, Long caronaId) throws CaronaException, SQLException {
+        atualizarStatusCaronas();
+        Carona carona = buscarCaronaDoMotorista(motoristaId, caronaId);
+
+        if (carona.getStatus() != StatusCarona.ATIVA) {
+            throw new CaronaException("Apenas caronas ativas podem ser marcadas como concluídas.");
+        }
+
+        carona.setStatus(StatusCarona.CONCLUIDA);
+        caronaRepo.atualizarStatus(caronaId, StatusCarona.CONCLUIDA);
+        return carona;
+    }
+
     private void validarEdicaoPermitida(Carona carona) throws CaronaException {
+        if (carona.getStatus() == StatusCarona.CONCLUIDA || carona.getStatus() == StatusCarona.CANCELADA) {
+            throw new CaronaException("Não é possível editar ou cancelar uma carona encerrada.");
+        }
         if (!LocalDateTime.now().isBefore(carona.getDataHora())) {
             throw new CaronaException(
                 "Não é possível editar ou cancelar uma carona após o horário de saída (RN02.6).");
@@ -323,11 +373,7 @@ public class CaronaService {
             throw new CaronaException("ID do usuário inválido.");
         }
         
-        // ==================================================================
-        // === ESTA É A CORREÇÃO FINAL E DEFINITIVA ===
-        // ==================================================================
-        // O código antigo estava chamando 'buscarPorEmail(id.toString())', o que estava errado.
-        // O código correto é chamar 'buscarPorId(id)'.
+        // Use buscarPorId para localizar o usuário por ID
         return usuarioRepo.buscarPorId(id)
             .orElseThrow(() -> new CaronaException(
                 "Usuário não encontrado (id=" + id + ")."));

@@ -86,7 +86,7 @@ public class UsuarioServiceTest {
             () -> usuarioService.cadastrar(usuario)
         );
 
-        assertEquals("E-mail deve ser institucional com domínio @edu.unisinos.br.", exception.getMessage());
+        assertEquals("E-mail deve ser institucional com domínio @unisinos.br ou @edu.unisinos.br.", exception.getMessage());
     }
 
     private static class InMemoryUsuarioRepository implements UsuarioRepository {

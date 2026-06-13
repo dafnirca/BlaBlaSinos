@@ -36,7 +36,7 @@ public class CaronaHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
 
         try {
-            // Roteamento baseado no caminho e no método
+            // request routing
             if ("/api/caronas/buscar".equals(path) && "GET".equals(method)) {
                 handleSearch(exchange); // Rota para busca de passageiros
             } else if ("/api/caronas".equals(path) && "GET".equals(method)) {
@@ -47,6 +47,8 @@ public class CaronaHandler implements HttpHandler {
                 handlePut(exchange); // Rota para editar uma carona
             } else if ("/api/caronas".equals(path) && "DELETE".equals(method)) {
                 handleDelete(exchange); // Rota para cancelar uma carona
+            } else if ("/api/caronas/concluir".equals(path) && "PUT".equals(method)) {
+                handleConcluir(exchange);
             } else {
                 sendResponse(exchange, 404, "{\"error\": \"Rota nao encontrada\"}");
             }
@@ -111,7 +113,23 @@ public class CaronaHandler implements HttpHandler {
         }
     }
 
-    // NOVO MÉTODO: Lida com a busca de caronas por passageiros
+    // Conclusão de uma carona (motorista)
+    private void handleConcluir(HttpExchange exchange) throws Exception {
+        try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
+            var map = gson.fromJson(reader, java.util.Map.class);
+            if (map == null) throw new Exception("Payload inválido.");
+            Object mId = map.get("motoristaId");
+            Object cId = map.get("caronaId");
+            if (mId == null || cId == null) throw new Exception("motoristaId e caronaId sao obrigatorios.");
+            long motoristaId = ((Number)mId).longValue();
+            long caronaId = ((Number)cId).longValue();
+
+            br.blablasinos.model.Carona resultado = caronaService.concluirCarona(motoristaId, caronaId);
+            sendResponse(exchange, 200, gson.toJson(resultado));
+        }
+    }
+
+    // Busca de caronas por passageiros
     private void handleSearch(HttpExchange exchange) throws Exception {
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> params = parseQuery(query);
@@ -123,7 +141,7 @@ public class CaronaHandler implements HttpHandler {
         sendResponse(exchange, 200, gson.toJson(caronas));
     }
 
-    // MÉTODO RENOMEADO: Lida com a listagem de caronas de um motorista
+    // Listagem de caronas de um motorista
     private void handleGetMinhasCaronas(HttpExchange exchange) throws Exception {
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> params = parseQuery(query);
@@ -165,7 +183,7 @@ public class CaronaHandler implements HttpHandler {
         }
     }
 
-    // Método auxiliar para extrair parâmetros da URL
+    // Auxiliar: extrai parâmetros da URL
     private Map<String, String> parseQuery(String query) {
         if (query == null) {
             return Map.of();

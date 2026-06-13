@@ -94,6 +94,12 @@ class CaronaServiceTest {
                 .filter(r -> r.getPassageiroId() == passageiroId)
                 .collect(Collectors.toList());
         }
+        @Override
+        public List<Reserva> listarConfirmadasPorCarona(long caronaId) {
+            return db.values().stream()
+                .filter(r -> r.getCaronaId() == caronaId && "CONFIRMADA".equals(r.getStatus()))
+                .collect(Collectors.toList());
+        }
     }
 
     static class InMemoryUsuarioRepository implements UsuarioRepository {
@@ -167,6 +173,11 @@ class CaronaServiceTest {
                 c.getMotoristaId().equals(motoristaId) &&
                 Math.abs(java.time.Duration.between(c.getDataHora(), horario).toMinutes()) < 60
             );
+        }
+
+        @Override
+        public int ativarAgendadasVencidasComReservaConfirmada(java.time.LocalDateTime agora) {
+            return 0; // evitar acesso ao banco real durante testes
         }
     }
 }

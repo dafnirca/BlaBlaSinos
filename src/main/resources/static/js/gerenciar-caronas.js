@@ -24,33 +24,105 @@ function renderCaronas(caronas) {
         const horaFormatada = dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         const tr = document.createElement('tr');
+        const status = carona.status || 'AGENDADA';
+        const statusLabel = status;
+        // Actions: Edit, Cancel, optionally Conclude or Evaluate
+        let actionsHtml = `
+            <button class="btn-edit" data-id="${carona.id}">Editar</button>
+            <button class="btn-delete" data-id="${carona.id}">Cancelar</button>
+        `;
+        if (status === 'ATIVA') {
+            actionsHtml += ` <button class="btn-concluir" data-id="${carona.id}">Concluir Carona</button>`;
+        }
+        if (status === 'CONCLUIDA') {
+            actionsHtml += ` <button class="btn-avaliar-passageiros" data-id="${carona.id}">Avaliar Passageiros</button>`;
+        }
+
         tr.innerHTML = `
             <td>${carona.destino}</td>
+            <td>${statusLabel}</td>
             <td>${dataFormatada} às ${horaFormatada}</td>
             <td>${carona.vagasDisponiveis}/${carona.vagasTotais}</td>
             <td>${carona.valor || '0.00'}</td>
-            <td class="actions">
-                <button class="btn-edit" data-id="${carona.id}">Editar</button>
-                <button class="btn-delete" data-id="${carona.id}">Cancelar</button>
-            </td>
+            <td class="actions">${actionsHtml}</td>
         `;
         caronasList.appendChild(tr);
         const btnEdit = tr.querySelector('.btn-edit');
         const btnDelete = tr.querySelector('.btn-delete');
+        const btnConcluir = tr.querySelector('.btn-concluir');
+        const btnAvaliarPassageiros = tr.querySelector('.btn-avaliar-passageiros');
         if (btnEdit) btnEdit.addEventListener('click', () => abrirModalParaEdicao(carona));
         if (btnDelete) btnDelete.addEventListener('click', () => cancelarCarona(carona.id));
+        if (btnConcluir) btnConcluir.addEventListener('click', () => concluirCaronaConfirm(carona.id));
+        if (btnAvaliarPassageiros) btnAvaliarPassageiros.addEventListener('click', () => avaliarPassageiros(carona.id));
     });
+}
+
+async function concluirCaronaConfirm(caronaId) {
+    const motoristaId = localStorage.getItem('userId');
+    if (!motoristaId) { alert('Usuário não logado'); return; }
+    if (!confirm('Deseja marcar esta carona como concluída? Esta ação não pode ser desfeita.')) return;
+    try {
+        const resp = await fetch('/api/caronas/concluir', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motoristaId: parseInt(motoristaId), caronaId: parseInt(caronaId) })
+        });
+        const result = await resp.json();
+        if (!resp.ok) throw new Error(result.error || 'Falha ao concluir carona');
+        alert('Carona concluída com sucesso.');
+        carregarMinhasCaronas();
+    } catch (err) {
+        alert('Erro: ' + err.message);
+    }
+}
+
+async function avaliarPassageiros(caronaId) {
+    const motoristaId = localStorage.getItem('userId');
+    if (!motoristaId) { alert('Usuário não logado'); return; }
+    try {
+        const resp = await fetch(`/api/avaliacoes?caronaId=${caronaId}&avaliadorId=${motoristaId}`);
+        if (!resp.ok) throw new Error('Falha ao buscar passageiros avaliaveis');
+        const data = await resp.json();
+        const avaliaveis = data.avaliaveis || data; // handler returns {avaliaveis: []}
+        if (!avaliaveis || avaliaveis.length === 0) { alert('Nenhum passageiro para avaliar.'); return; }
+        for (const passageiroId of avaliaveis) {
+            // Busca nome do passageiro
+            let nome = passageiroId;
+            try {
+                const p = await fetch(`/api/perfil?id=${encodeURIComponent(passageiroId)}`);
+                if (p.ok) { const up = await p.json(); nome = up.nome || passageiroId; }
+            } catch {}
+
+            if (!confirm(`Deseja avaliar o passageiro ${nome} (id=${passageiroId}) agora?`)) continue;
+            const notaStr = prompt('Informe a nota (1-5):', '5');
+            const nota = parseInt(notaStr);
+            if (isNaN(nota) || nota < 1 || nota > 5) { alert('Nota invalida, pulando.'); continue; }
+            const comentario = prompt('Comentário (opcional):', '');
+            const post = await fetch('/api/avaliacoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ caronaId: parseInt(caronaId), avaliadorId: parseInt(motoristaId), avaliadoId: parseInt(passageiroId), nota: nota, comentario: comentario })
+            });
+            const r = await post.json();
+            if (!post.ok) alert('Erro ao enviar avaliação: ' + (r.error || JSON.stringify(r)));
+            else alert('Avaliação enviada para ' + nome);
+        }
+        carregarMinhasCaronas();
+    } catch (err) {
+        alert('Erro: ' + err.message);
+    }
 }
 
 function openModal() {
     caronaForm.reset();
     modalTitle.textContent = 'Oferecer Nova Carona';
     document.getElementById('carona-id').value = '';
-    modal.classList.remove('hidden'); // CORREÇÃO: Mostra o modal
+    modal.classList.remove('hidden');
 }
 
 function closeModal() {
-    modal.classList.add('hidden'); // CORREÇÃO: Esconde o modal
+    modal.classList.add('hidden');
 }
 
 async function carregarMinhasCaronas() {
@@ -68,7 +140,7 @@ async function carregarMinhasCaronas() {
         renderCaronas(caronas);
     } catch (error) {
         console.error(error);
-        renderCaronas([]); // Mostra a lista vazia em caso de erro
+        renderCaronas([]);
     }
 }
 
@@ -77,11 +149,19 @@ async function salvarCarona(event) {
     const motoristaId = localStorage.getItem('userId');
     const data = document.getElementById('data').value;
     const hora = document.getElementById('hora').value;
+    const origem = document.getElementById('origem').value;
+    const destino = document.getElementById('destino').value;
+
+    // Validação: origem e destino não podem ser iguais
+    if (origem.trim().toLowerCase() === destino.trim().toLowerCase()) {
+        alert("A origem e o destino não podem ser iguais.");
+        return;
+    }
 
     const caronaData = {
         motoristaId: parseInt(motoristaId),
-        origem: document.getElementById('origem').value,
-        destino: document.getElementById('destino').value,
+        origem,
+        destino,
         dataHora: `${data}T${hora}`,
         vagasTotais: parseInt(document.getElementById('vagas').value),
         valor: parseFloat(document.getElementById('valor').value) || 0
@@ -153,5 +233,5 @@ async function cancelarCarona(caronaId) {
 // --- Inicialização e Event Listeners ---
 window.addEventListener('load', carregarMinhasCaronas);
 btnAdicionar.addEventListener('click', openModal);
-btnCancelarModal.addEventListener('click', closeModal); // CORREÇÃO: Garante que o botão de cancelar feche o modal
+btnCancelarModal.addEventListener('click', closeModal);
 caronaForm.addEventListener('submit', salvarCarona);
