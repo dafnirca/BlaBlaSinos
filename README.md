@@ -19,7 +19,7 @@ Principais funcionalidades
 Tecnologias
 
 - Linguagem: Java 17+
-- Interface: Java Swing (GUI)
+- Interface: CSS + HTML + JS
 - Banco de dados: SQLite (sqlite-jdbc)
 - Testes: JUnit 5
 - Build: Maven
