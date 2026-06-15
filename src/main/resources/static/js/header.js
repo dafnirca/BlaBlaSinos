@@ -74,11 +74,10 @@ async function renderHeader() {
     nav.appendChild(createNavLink('buscar-caronas.html', 'Buscar Caronas', currentPage));
     if (motorista) {
         nav.appendChild(createNavLink('gerenciar-caronas.html', 'Minhas Caronas', currentPage));
-        nav.appendChild(createNavLink('solicitacoes.html', 'Solicitacoes', currentPage));
-    } else {
-        // Passageiro: link para acompanhar viagens
-        nav.appendChild(createNavLink('minhas-viagens.html', 'Minhas Viagens', currentPage));
+        nav.appendChild(createNavLink('solicitacoes.html', 'Solicitações', currentPage));
     }
+    // Mostrar 'Minhas Viagens' para todos os perfis
+    nav.appendChild(createNavLink('minhas-viagens.html', 'Minhas Viagens', currentPage));
 
     const actions = document.createElement('div');
     actions.className = 'header-actions';

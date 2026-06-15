@@ -5,7 +5,7 @@
 }
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #f4f6f9;
+    background: var(--color-bg);
     padding: 40px;
 }
 .perfil-container {
@@ -15,19 +15,19 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 0;
-    color: #2c3e50;
+    color: var(--color-text);
 }
 .card {
-    background: white;
+    background: var(--color-surface);
     margin-top: 24px;
     padding: 25px;
     margin-bottom: 25px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 24px rgba(2,6,23,0.6);
 }
 .card h2 {
     margin-bottom: 20px;
-    color: #34495e;
+    color: var(--color-text);
 }
 .input-group {
     display: flex;
@@ -41,27 +41,33 @@ h1 {
 .input-group input,
 .input-group select {
     padding: 12px;
-    border: 1px solid #dcdde1;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     font-size: 14px;
+}
+.input-group input:disabled {
+    background: rgba(255,255,255,0.02);
+    color: var(--color-text);
+    opacity: 1; /* ensure not faded */
+    font-weight: 600;
 }
 .input-group input:focus,
 .input-group select:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--color-primary);
 }
 button {
     width: 100%;
     padding: 15px;
     border: none;
     border-radius: 10px;
-    background: #3498db;
-    color: white;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-600));
+    color: var(--color-on-primary);
     font-size: 16px;
     cursor: pointer;
 }
 button:hover {
-    background: #2980b9;
+    filter: brightness(0.95);
 }
 .actions-container {
     margin-top: 16px;
@@ -74,15 +80,15 @@ button:hover {
     display: inline-block;
     padding: 12px 22px;
     border-radius: 10px;
-    border: 1px solid #3498db;
-    color: #3498db;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
     text-decoration: none;
     font-weight: bold;
     transition: background 0.2s, color 0.2s;
 }
 .action-link:hover {
-    background: #3498db;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
 }
 .hidden {
     display: none;
@@ -96,6 +102,6 @@ button:hover {
 }
 .info-text {
     font-size: 14px;
-    color: #7f8c8d;
+    color: var(--color-muted);
     margin-bottom: 20px;
 }

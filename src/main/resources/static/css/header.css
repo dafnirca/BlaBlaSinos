@@ -7,9 +7,9 @@
     width: 100%;
     max-width: var(--content-max-width, 1100px);
     margin: 0 auto;
-    background: #ffffff;
-    color: #2c3e50;
-    border: 1px solid #dfe4ea;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     position: sticky;
     top: 16px;
@@ -29,14 +29,14 @@
 }
 
 .brand-link {
-    color: #2c3e50;
+    color: var(--color-text);
     text-decoration: none;
     font-size: 1.15rem;
     font-weight: 700;
 }
 
 .brand-subtitle {
-    color: #7f8c8d;
+    color: var(--color-muted);
     font-size: 0.9rem;
 }
 
@@ -49,7 +49,7 @@
 }
 
 .site-nav a {
-    color: #2c3e50;
+    color: var(--color-text);
     text-decoration: none;
     font-weight: 600;
     padding: 10px 14px;
@@ -59,8 +59,8 @@
 
 .site-nav a:hover,
 .site-nav a.active {
-    background-color: #3498db;
-    color: #ffffff;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 .header-actions {
@@ -76,9 +76,9 @@
 
 .notifications-button {
     position: relative;
-    border: 1px solid #d0d7de;
-    background: #ffffff;
-    color: #2c3e50;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
     width: 40px;
     height: 40px;
     border-radius: 999px;
@@ -89,7 +89,7 @@
 }
 
 .notifications-button:hover {
-    background: #f4f8fb;
+    background: rgba(15,23,42,0.03);
 }
 
 .notifications-bell {
@@ -104,8 +104,8 @@
     min-width: 18px;
     height: 18px;
     border-radius: 999px;
-    background: #e74c3c;
-    color: #ffffff;
+    background: var(--color-danger);
+    color: var(--color-on-primary);
     font-size: 0.7rem;
     font-weight: 700;
     display: flex;
@@ -122,8 +122,8 @@
     width: min(360px, 88vw);
     max-height: 360px;
     overflow: auto;
-    background: #ffffff;
-    border: 1px solid #dfe4ea;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     box-shadow: 0 12px 30px rgba(33, 37, 41, 0.15);
     z-index: 1200;
@@ -132,7 +132,7 @@
 .notifications-title {
     padding: 10px 12px;
     font-weight: 700;
-    border-bottom: 1px solid #edf1f5;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .notifications-list {
@@ -143,8 +143,8 @@
 .notification-item {
     width: 100%;
     border: none;
-    border-bottom: 1px solid #f0f3f6;
-    background: #ffffff;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
     text-align: left;
     display: flex;
     flex-direction: column;
@@ -158,27 +158,41 @@
 }
 
 .notification-item.unread {
-    background: #eef7ff;
+    background: rgba(79,70,229,0.14); /* stronger highlight for unread */
 }
 
 .notification-item:hover {
-    background: #f6fbff;
+    background: rgba(79,70,229,0.08);
 }
 
 .notification-message {
-    color: #2c3e50;
+    color: var(--color-muted);
     font-size: 0.92rem;
 }
 
+.notification-item.unread .notification-message {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.notification-item:not(.unread) {
+    opacity: 0.3; /* faded look for read notifications */
+    transition: opacity 150ms ease, background 150ms ease;
+}
+
+.notification-item:not(.unread):hover {
+    opacity: 0.95; /* emphasize on hover */
+}
+
 .notification-meta {
-    color: #7b8a97;
+    color: var(--color-muted);
     font-size: 0.8rem;
 }
 
 .notifications-empty {
     margin: 0;
     padding: 14px 12px;
-    color: #6b7785;
+    color: var(--color-muted);
     font-size: 0.9rem;
 }
 
@@ -187,14 +201,14 @@
 }
 
 .header-welcome {
-    color: #34495e;
+    color: var(--color-text);
     font-size: 0.95rem;
 }
 
 .header-logout {
-    border: 1px solid #e74c3c;
-    background: #e74c3c;
-    color: white;
+    border: 1px solid var(--color-danger);
+    background: var(--color-danger);
+    color: var(--color-on-primary);
     font-weight: 600;
     padding: 8px 14px;
     border-radius: 10px;
@@ -202,7 +216,7 @@
 }
 
 .header-logout:hover {
-    background-color: #c0392b;
+    background-color: color-mix(in srgb, var(--color-danger) 80%, black 20%);
 }
 
 @media (max-width: 860px) {

@@ -6,9 +6,9 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #f4f6f9;
+    background: var(--color-bg);
     padding: 30px;
-    color: #2c3e50;
+    color: var(--color-text);
 }
 
 .main-container {
@@ -25,11 +25,11 @@ h1 {
 }
 
 .card {
-    background: white;
+    background: var(--color-surface);
     margin-top: 30px;
     padding: 28px;
     border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(2,6,23,0.6);
 }
 
 .card-header {
@@ -40,7 +40,7 @@ h1 {
 }
 
 .card-header h2 {
-    color: #34495e;
+    color: var(--color-text);
 }
 
 .table-wrapper {
@@ -55,12 +55,12 @@ table {
 th, td {
     padding: 14px;
     text-align: left;
-    border-bottom: 1px solid #e1e5eb;
+    border-bottom: 1px solid var(--color-border);
 }
 
 th {
     font-weight: bold;
-    color: #34495e;
+    color: var(--color-text);
 }
 
 td .actions button {
@@ -71,7 +71,7 @@ td .actions button {
 }
 
 .empty-state {
-    color: #7f8c8d;
+    color: var(--color-muted);
     font-style: italic;
     text-align: center;
     padding: 40px 0;
@@ -81,21 +81,21 @@ button {
     padding: 12px 20px;
     border: none;
     border-radius: 10px;
-    background: #3498db;
-    color: white;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-600));
+    color: var(--color-on-primary);
     font-size: 16px;
     cursor: pointer;
     transition: background 0.2s;
 }
 
 button:hover {
-    background: #2980b9;
+    filter: brightness(0.95);
 }
 
 button.btn-edit { background: #f39c12; }
-button.btn-edit:hover { background: #e67e22; }
-button.btn-delete { background: #e74c3c; }
-button.btn-delete:hover { background: #c0392b; }
+button.btn-edit:hover { filter: brightness(0.95); }
+button.btn-delete { background: var(--color-danger); }
+button.btn-delete:hover { filter: brightness(0.9); }
 
 /* Modal Styles */
 .modal-overlay {
@@ -112,7 +112,7 @@ button.btn-delete:hover { background: #c0392b; }
 }
 
 .modal-content {
-    background: white;
+    background: var(--color-surface);
     padding: 30px;
     border-radius: 14px;
     width: 90%;
@@ -122,12 +122,32 @@ button.btn-delete:hover { background: #c0392b; }
 .modal-content h2 { margin-bottom: 20px; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .input-group { display: flex; flex-direction: column; gap: 8px; }
-.input-group label { font-weight: bold; }
-.input-group input { padding: 12px; border: 1px solid #dcdde1; border-radius: 10px; font-size: 14px; }
+.input-group label { font-weight: bold; color: var(--color-text); }
+.modal-content .input-group input,
+.modal-content .input-group select,
+.modal-content .input-group textarea {
+    padding: 12px;
+    border: 1px solid rgba(7,17,59,0.12);
+    border-radius: 10px;
+    font-size: 14px;
+    background: #ffffff;
+    color: #000000;
+}
+.modal-content .input-group input::placeholder,
+.modal-content .input-group textarea::placeholder {
+    color: #6b7280; /* slightly muted on white */
+}
+.modal-content .input-group input:focus,
+.modal-content .input-group select:focus,
+.modal-content .input-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.06);
+}
 .modal-actions { margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; }
 .modal-actions button { width: 140px; }
-#btn-cancelar-modal { background: #bdc3c7; }
-#btn-cancelar-modal:hover { background: #95a5a6; }
+#btn-cancelar-modal { background: rgba(255,255,255,0.06); color: var(--color-text); }
+#btn-cancelar-modal:hover { filter: brightness(0.95); }
 
 /* CORREÇÃO: Classe para esconder elementos */
 .hidden {
