@@ -1,0 +1,15 @@
+# Casos de Teste - Sprint 2 (Responsabilidade: Gabriel Kaiper)
+
+Este documento detalha os casos de teste para as funcionalidades desenvolvidas nesta sprint.
+
+## UC03 - Oferecer, Editar e Cancelar Caronas (Backend / Regras de Negócio)
+
+| ID do Teste | Funcionalidade | Descrição do Teste | Passos para Execução | Resultado Esperado |
+| :--- | :--- | :--- | :--- | :--- |
+| **CT-D01** | Cadastro de Carona | Validar o cadastro de uma carona com dados válidos. | 1. Enviar requisição para cadastrar carona. 2. Informar origem, destino (um deles sendo campus Unisinos). 3. Informar data/hora no futuro. 4. Informar vagas totais entre 1 e 4. | O sistema cadastra a carona com sucesso, gera um ID e salva no banco de dados. |
+| **CT-D02** | Cadastro de Carona (Data Inválida)| Impedir a criação de uma carona com data/hora no passado. | 1. Enviar requisição para cadastrar carona. 2. Informar a data/hora para um momento que já passou (ex: ontem). | O sistema rejeita o cadastro e retorna o erro: "A carona deve ser agendada para o futuro." | 
+| **CT-D03**| Cadastro de Carona (Vagas Inválidas) | Impedir a criação de uma carona com quantidade de vagas fora do limite permitido. | 1. Enviar requisição para cadastrar carona. 2. Informar a quantidade de vagas totais igual a 0 ou 5 | O sistema rejeita o cadastro e retorna erro informando que as vagas devem ser entre 1 e 4. |
+| **CT-D04** | Edição de Carona (Tempo Limite) | Impedir a edição de uma carona após o seu horário de saída. | 1. Tentar editar os dados (ex: destino) de uma carona cuja dataHora já seja menor que a data/hora atual. | "O sistema impede a edição e lança a exceção: "Não é possível editar ou cancelar uma carona após o horário de saída." |
+| **CT-D05** | Edição de Carona (Conflito de Vagas) | Impedir a redução de vagas totais para um número menor que as reservas já confirmadas. | 1. Selecionar uma carona com 4 vagas totais e 2 reservas confirmadas (2 disponíveis). 2. Tentar editar as vagas totais da carona para 1. | O sistema impede a edição e retorna erro informando que a quantidade de vagas não pode ser menor que o número de passageiros já confirmados. |
+| **CT-D06** | Cancelamento de Carona | Validar o cancelamento de uma carona antes do horário de saída. | 1. Selecionar uma carona agendada para o futuro. 2. Enviar a requisição de exclusão/cancelamento para o backend. | A carona é removida do banco de dados com sucesso e as vagas dos passageiros são liberadas. | 
+| **CT-D07** | Cancelamento de Carona (Tempo Limite) | Impedir o cancelamento de uma carona após o seu horário de saída | 1. Selecionar uma carona cuja dataHora seja no passado (já ocorreu). 2. Enviar a requisição de exclusão/cancelamento. | O sistema bloqueia a exclusão e lança a exceção: "Não é possível editar ou cancelar uma carona após o horário de saída." |

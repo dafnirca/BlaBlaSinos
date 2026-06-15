@@ -1,0 +1,249 @@
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    width: 100%;
+    max-width: var(--content-max-width, 1100px);
+    margin: 0 auto;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    position: sticky;
+    top: 16px;
+    z-index: 1000;
+}
+
+:root {
+    --content-max-width: 1300px;
+}
+
+.header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.brand-link {
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.brand-subtitle {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.site-nav {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    justify-content: center;
+}
+
+.site-nav a {
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.notifications {
+    position: relative;
+}
+
+.notifications-button {
+    position: relative;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notifications-button:hover {
+    background: rgba(15,23,42,0.03);
+}
+
+.notifications-bell {
+    font-size: 1.40rem;
+    line-height: 1;
+}
+
+.notifications-badge {
+    position: absolute;
+    top: -5px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--color-danger);
+    color: var(--color-on-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid #ffffff;
+}
+
+.notifications-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: min(360px, 88vw);
+    max-height: 360px;
+    overflow: auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(33, 37, 41, 0.15);
+    z-index: 1200;
+}
+
+.notifications-title {
+    padding: 10px 12px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-item {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item.unread {
+    background: rgba(79,70,229,0.14); /* stronger highlight for unread */
+}
+
+.notification-item:hover {
+    background: rgba(79,70,229,0.08);
+}
+
+.notification-message {
+    color: var(--color-muted);
+    font-size: 0.92rem;
+}
+
+.notification-item.unread .notification-message {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.notification-item:not(.unread) {
+    opacity: 0.3; /* faded look for read notifications */
+    transition: opacity 150ms ease, background 150ms ease;
+}
+
+.notification-item:not(.unread):hover {
+    opacity: 0.95; /* emphasize on hover */
+}
+
+.notification-meta {
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.notifications-empty {
+    margin: 0;
+    padding: 14px 12px;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.header-welcome {
+    color: var(--color-text);
+    font-size: 0.95rem;
+}
+
+.header-logout {
+    border: 1px solid var(--color-danger);
+    background: var(--color-danger);
+    color: var(--color-on-primary);
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.header-logout:hover {
+    background-color: color-mix(in srgb, var(--color-danger) 80%, black 20%);
+}
+
+@media (max-width: 860px) {
+    .site-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .site-nav {
+        justify-content: center;
+    }
+    .header-actions {
+        justify-content: space-between;
+    }
+    .notifications-dropdown {
+        right: -40px;
+    }
+}
+
+/* Força largura e alinhamento do botão Sair para ser igual em todas as telas */
+.site-header .header-logout {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 96px !important;
+    min-width: 96px !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 14px !important;
+}

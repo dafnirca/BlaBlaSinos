@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BlaBlaSinos - Buscar Caronas</title>
+
+    <link rel="stylesheet" href="css/theme.css">
+    <link
+        rel="stylesheet"
+        href="css/buscar-caronas.css"
+    >
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/header.css">
+
+</head>
+
+<body>
+
+    <div id="site-header"></div>
+    <div class="search-container">
+
+        <h1>Buscar Caronas</h1>
+
+        <div class="card search-card">
+
+            <h2>Filtros de busca</h2>
+
+            <form id="buscar-caronas-form">
+
+                <div class="form-grid">
+
+                    <div class="input-group">
+                        <label for="origem">Origem</label>
+                        <input
+                            type="text"
+                            id="origem"
+                            placeholder="Digite o ponto de partida"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="destino">Destino</label>
+                        <input
+                            type="text"
+                            id="destino"
+                            placeholder="Digite o destino desejado"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="data">Data</label>
+                        <input
+                            type="date"
+                            id="data"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="hora">Hora</label>
+                        <input
+                            type="time"
+                            id="hora"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="vagasBusca">Número de vagas</label>
+                        <input
+                            type="number"
+                            id="vagasBusca"
+                            min="1"
+                            placeholder="1"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                    
+
+                </div>
+
+                <button type="submit">Buscar Caronas</button>
+
+            </form>
+
+        </div>
+
+        <div class="card results-card">
+
+            <div class="results-header">
+                <h2>Resultados</h2>
+                <span id="results-count">Use os filtros para encontrar caronas</span>
+            </div>
+
+            <div id="results-list" class="results-list">
+
+                <p class="empty-state">Informe os filtros e clique em Buscar caronas.</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="js/header.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/buscar-caronas.js"></script>
+
+</body>
+
+</html>

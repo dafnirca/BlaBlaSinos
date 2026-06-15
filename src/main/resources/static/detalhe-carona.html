@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlaBlaSinos - Detalhes da Carona</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/detalhe-carona.css">
+    <link rel="stylesheet" href="css/header.css">
+</head>
+<body>
+    <div id="site-header"></div>
+    <div class="container">
+        <h1>Detalhes da Carona</h1>
+        <div class="card" id="carona-details">
+            <!-- Os detalhes serão preenchidos pelo JS -->
+            <div class="detail-item">
+                <span>Motorista</span>
+                <strong id="motorista-nome">Carregando...</strong>
+            </div>
+            <div class="detail-item">
+                <span>Origem</span>
+                <strong id="carona-origem">Carregando...</strong>
+            </div>
+            <div class="detail-item">
+                <span>Destino</span>
+                <strong id="carona-destino">Carregando...</strong>
+            </div>
+            <div class="detail-item">
+                <span>Data e Hora</span>
+                <strong id="carona-datahora">Carregando...</strong>
+            </div>
+            <div class="detail-item">
+                <span>Vagas</span>
+                <strong id="carona-vagas">Carregando...</strong>
+            </div>
+            <div class="detail-item">
+                <span>Valor da Carona</span>
+                <strong id="carona-valor">Carregando...</strong>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="btn-solicitar" class="btn-principal">Criar Solicitação</button>
+            <div id="status-resultado" style="display: none;">
+                <p id="status-text"></p>
+                <button id="btn-cancelar" class="btn-perigo" style="display: none;">Cancelar Solicitação</button>
+            </div>
+            <div id="avaliacao-area" style="margin-top:12px;"></div>
+        </div>
+    </div>
+    <script src="js/header.js"></script>
+    <script src="js/detalhe-carona.js"></script>
+</body>
+</html>
