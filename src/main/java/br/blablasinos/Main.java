@@ -1,5 +1,10 @@
 package br.blablasinos;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import com.sun.net.httpserver.HttpServer;
+
 import br.blablasinos.handler.CadastroHandler;
 import br.blablasinos.handler.CaronaHandler;
 import br.blablasinos.handler.LoginHandler;
@@ -7,9 +12,6 @@ import br.blablasinos.handler.NotificacaoHandler;
 import br.blablasinos.handler.PerfilHandler;
 import br.blablasinos.handler.SolicitacaoHandler;
 import br.blablasinos.handler.StaticFileHandler;
-import com.sun.net.httpserver.HttpServer;
-import java.io.IOException;
-import java.net.InetSocketAddress;
 
 public class Main {
 
@@ -30,7 +32,10 @@ public class Main {
 
         server.setExecutor(null);
         server.start();
-
+        
+        System.out.println("BlaBlaSinos iniciado!");
+        System.out.println("Servidor escutando na porta " + port);
+        System.out.println("Acesse: http://localhost:" + port + "/login.html");
         // Server started
     }
 }

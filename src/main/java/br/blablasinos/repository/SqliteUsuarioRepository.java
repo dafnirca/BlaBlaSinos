@@ -1,9 +1,16 @@
 package br.blablasinos.repository;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Optional;
+
 import br.blablasinos.model.TipoUsuario;
 import br.blablasinos.model.Usuario;
-import java.sql.*;
-import java.util.Optional;
 
 public class SqliteUsuarioRepository implements UsuarioRepository {
 
@@ -114,7 +121,51 @@ public class SqliteUsuarioRepository implements UsuarioRepository {
 
     private Connection criarConexao() throws SQLException { return DriverManager.getConnection(databaseUrl); }
     
-    // O código de criarTabelaSeNecessario e criarColunaSeNaoExistir permanece o mesmo
-    private void criarTabelaSeNecessario() { /* ... seu código existente ... */ }
-    private void criarColunaSeNaoExistir(Connection c, String t, String col, String def) throws SQLException { /* ... seu código existente ... */ }
+    // Cria a tabela com todas as colunas necessárias se ainda não existir
+    private void criarTabelaSeNecessario() {
+        String sql = "CREATE TABLE IF NOT EXISTS usuarios (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "nome TEXT NOT NULL, " +
+                "email TEXT NOT NULL UNIQUE, " +
+                "senha TEXT NOT NULL, " +
+                "tipo TEXT NOT NULL, " +
+                "cnh TEXT, " +
+                "modelo_veiculo TEXT, " +
+                "cor_veiculo TEXT, " +
+                "placa_veiculo TEXT, " +
+                "tentativas_falhas INTEGER DEFAULT 0, " +
+                "bloqueado_ate BIGINT" +
+                ");";
+
+        try (Connection c = criarConexao(); Statement s = c.createStatement()) {
+            s.execute(sql);
+
+            // Garante colunas compatíveis em DBs antigos
+            criarColunaSeNaoExistir(c, "usuarios", "cnh", "TEXT");
+            criarColunaSeNaoExistir(c, "usuarios", "modelo_veiculo", "TEXT");
+            criarColunaSeNaoExistir(c, "usuarios", "cor_veiculo", "TEXT");
+            criarColunaSeNaoExistir(c, "usuarios", "placa_veiculo", "TEXT");
+            criarColunaSeNaoExistir(c, "usuarios", "tentativas_falhas", "INTEGER DEFAULT 0");
+            criarColunaSeNaoExistir(c, "usuarios", "bloqueado_ate", "BIGINT");
+            criarColunaSeNaoExistir(c, "usuarios", "tipo", "TEXT NOT NULL DEFAULT 'PASSAGEIRO'");
+        } catch (SQLException e) {
+            throw new RuntimeException("Falha ao criar ou atualizar a tabela usuarios", e);
+        }
+    }
+
+    private void criarColunaSeNaoExistir(Connection c, String t, String col, String def) throws SQLException {
+        String pragma = "PRAGMA table_info(" + t + ")";
+        try (Statement s = c.createStatement(); ResultSet rs = s.executeQuery(pragma)) {
+            boolean encontrado = false;
+            while (rs.next()) {
+                String nome = rs.getString("name");
+                if (col.equalsIgnoreCase(nome)) { encontrado = true; break; }
+            }
+            if (!encontrado) {
+                try (Statement s2 = c.createStatement()) {
+                    s2.execute("ALTER TABLE " + t + " ADD COLUMN " + col + " " + def);
+                }
+            }
+        }
+    }
 }
