@@ -1,176 +1,126 @@
-# 🚗 BlaBlaSinos
+# 🚗 BlaBlaSinos — Sistema de Caronas Compartilhadas
 
-> Sistema de caronas compartilhadas para a comunidade universitária do campus São Leopoldo da Universidade do Vale do Rio dos Sinos (Unisinos).
+Projeto finalizado: versão final do sistema acadêmico de caronas para a comunidade do campus São Leopoldo (Unisinos).
 
-Conecta motoristas e passageiros da comunidade Unisinos — alunos, professores e funcionários — para o compartilhamento de deslocamentos até o campus, promovendo mobilidade sustentável, redução de custos e integração entre os membros da universidade.
+Resumo: conecta motoristas e passageiros da comunidade universitária para oferta e reserva de caronas, com regras de negócio para reservas temporárias, cancelamentos e notificações internas.
 
-**Disciplina:** Implementação de Software — Unisinos  
-**Equipe:** Dafni Rosa · Gabriel Kaiper · Jordano Rodrigues  
-**Status:** 🟡 Em desenvolvimento (Sprint 4)
+Status do repositório: Versão final entregue (Sprint 4 concluída).
 
----
+Principais funcionalidades
 
-## Funcionalidades do MVP
+- Autenticação com restrição a e-mails institucionais (`@edu.unisinos.br`).
+- Cadastro de perfil como motorista (com dados do veículo) ou passageiro.
+- Oferta de caronas com origem, destino, data, horário e número de vagas.
+- Busca de caronas por destino e data, com filtros úteis.
+- Solicitação de vaga com reserva temporária (30 minutos) e aceite/recusa pelo motorista.
+- Política de cancelamento com regra de 1 hora de antecedência após confirmação.
+- Notificações internas e gerenciamento de solicitações.
 
-- Autenticação restrita a e-mails institucionais (`@edu.unisinos.br`)
-- Cadastro de perfil como **motorista** (com dados de veículo) ou **passageiro**
-- Oferta de caronas com origem, destino, data, horário e número de vagas
-- Busca de caronas disponíveis com filtros por destino e data
-- Solicitação de vaga com reserva temporária de 30 minutos
-- Aceite ou recusa de solicitações pelo motorista
-- Cancelamento com regra de 1h de antecedência após confirmação
-- Notificações internas no sistema
+Tecnologias
 
----
+- Linguagem: Java 17+
+- Interface: Java Swing (GUI)
+- Banco de dados: SQLite (sqlite-jdbc)
+- Testes: JUnit 5
+- Build: Maven
+- Arquitetura: MVC + Service Layer
 
-## Tecnologias utilizadas
+Pré-requisitos
 
-| Categoria | Tecnologia |
-|-----------|-----------|
-| Linguagem | Java 17+ |
-| Interface gráfica | Java Swing |
-| Banco de dados | SQLite (via `sqlite-jdbc`) |
-| Testes | JUnit 5 |
-| Build | Maven |
-| Controle de versão | Git + GitHub |
-| Arquitetura | MVC + Service Layer |
+- JDK 17+ (verifique com `java -version`)
+- Maven 3.8+ (verifique com `mvn -version`)
+- Git (verifique com `git --version`)
 
----
+Como compilar e executar
 
-## Pré-requisitos
+1) Clonar o repositório e entrar na pasta:
 
-Antes de configurar o projeto, certifique-se de ter instalado:
-
-- **JDK 17 ou superior**  
-  Verifique com: `java -version`  
-  Download: https://adoptium.net
-
-- **Maven 3.8 ou superior**  
-  Verifique com: `mvn -version`  
-  Download: https://maven.apache.org/download.cgi
-
-- **Git**  
-  Verifique com: `git --version`  
-  Download: https://git-scm.com
-
-> **IDEs recomendadas:** IntelliJ IDEA Community ou Eclipse IDE for Java Developers.  
-> O banco de dados SQLite é embutido — não requer instalação separada.
-
----
-
-## Configuração do ambiente de desenvolvimento
-
-### 1. Clonar o repositório
-
-```bash
+```
 git clone https://github.com/dafnirca/BlaBlaSinos.git
-cd blablasinos
+cd BlaBlaSinos
 ```
 
-### 2. Fazer checkout na branch de desenvolvimento
+2) Compilar o projeto:
 
-```bash
-git checkout develop
 ```
-
-### 3. Instalar as dependências e compilar
-
-```bash
 mvn clean install
 ```
 
-Isso irá baixar as dependências declaradas no `pom.xml` (incluindo `sqlite-jdbc` e `junit-jupiter`) e compilar o projeto.
+3) Executar diretamente com Maven:
 
-### 4. Executar a aplicação
-
-```bash
+```
 mvn exec:java -Dexec.mainClass="br.blablasinos.Main"
 ```
 
-Ou, se preferir gerar o JAR executável primeiro:
+Ou gerar e executar o JAR:
 
-```bash
+```
 mvn package
 java -jar target/blablasinos-1.0-SNAPSHOT.jar
 ```
 
-Na primeira execução, o sistema criará automaticamente o arquivo de banco de dados `caronas.db` na raiz do projeto e aplicará o schema inicial (`src/main/resources/schema.sql`).
+Observação: na primeira execução o arquivo de banco `caronas.db` é criado automaticamente usando o DDL em `src/main/resources/schema.sql`.
 
-### 5. Executar os testes
+Testes
 
-```bash
+```
 mvn test
 ```
 
-Os testes unitários ficam em `src/test/java/` e cobrem as camadas `service/` e `repository/`.
-
----
-
-## Estrutura do projeto
+Estrutura do projeto
 
 ```
 blablasinos/
 ├── src/
 │   ├── main/
-│   │   ├── java/br/blablasinos/
-│   │   │   ├── exception/     # Falha de validação de usuário
-│   │   │   ├── handler/       # Controladores MVC
-│   │   │   ├── model/         # Entidades: Usuario, Carona, Reserva
-│   │   │   ├── repository/    # Acesso ao SQLite via JDBC
-│   │   │   ├── service/       # Regras de negócio (casos de uso)
-│   │   │   ├── validation/    # Validação de usuários
-│   │   │   └── view/          # Interfaces gráficas (Swing)
+│   │   ├── java/
+│   │   │   └── br/blablasinos/
+│   │   │       ├── config/
+│   │   │       ├── exception/
+│   │   │       ├── handler/
+│   │   │       ├── model/
+│   │   │       ├── repository/
+│   │   │       ├── service/
+│   │   │       ├── validation/
+│   │   │       └── view/
 │   │   └── resources/
-│   │       ├── static/        # Front-End
-│   │       ├── schema.sql     # DDL do banco de dados
-│   │       └── app.properties
+│   │       ├── app.properties
+│   │       ├── schema.sql
+│   │       └── static/
+│   │           ├── css/
+│   │           ├── js/
+│   │           └── *.html
 │   └── test/
-│       └── java/br/blablasinos/
-│           ├── repository/    # Testes de integração
-│           ├── service/       # Testes unitários
-│           └── validation/    # Testes de validação de cadastro
-└── docs/                      # Diagramas e documentação técnica
+│       └── java/
+│           └── br/blablasinos/
+│               ├── repository/
+│               ├── service/
+│               └── validation/
+├── target/ (artefatos gerados)
+└── docs/ (diagramas e documentação técnica)
 ```
 
-Consulte o arquivo [`docs/arquitetura.png`](docs/arquitetura.png) para o diagrama completo das camadas.
+Contribuição
 
----
-
-## Fluxo de contribuição
-
-Este projeto usa revisão cruzada obrigatória entre pares. Nenhum integrante faz merge do próprio PR.
+Fluxo esperado para contribuições:
 
 ```
-feature/branch  →  Pull Request  →  revisão de outro integrante  →  merge na develop
+feature/branch → Pull Request → revisão por outro integrante → merge na `develop`
 ```
 
-Consulte a seção **Fluxo de Pull Requests** no README para o passo a passo completo de branches, commits e critérios de revisão.
+Observação: nenhum integrante deve aprovar/mergear o próprio PR.
 
----
+Equipe e créditos
 
-## Sprints
+- Dafni Rosa
+- Gabriel Kaiper
+- Jordano Rodrigues
 
-| Sprint | Foco | Status |
-|--------|------|--------|
-| Sprint 1 | Planejamento — escopo, ambiente, modelagem e documentação base | ✅ Em andamento |
-| Sprint 2 | Núcleo funcional — autenticação, cadastro de caronas e persistência | ✅ Aguardando |
-| Sprint 3 | Funcionalidades completas — fluxo do passageiro, notificações e testes | ✅ Aguardando |
-| Sprint 4 | Entrega final — polimento, documentação técnica e apresentação | 🟡 Aguardando |
+Licença
 
----
+Projeto acadêmico desenvolvido para avaliação na disciplina de Implementação de Software — Unisinos. Uso restrito à avaliação acadêmica.
 
-## Documentação
+Contato
 
-| Documento | Descrição |
-|-----------|-----------|
-| [`docs/modelo-er.png`](docs/modelo-er.png) | Diagrama Entidade-Relacionamento |
-| [`docs/diagrama-casos-de-uso.png`](docs/diagrama-casos-de-uso.png) | Diagrama UML de casos de uso |
-| [`docs/arquitetura.png`](docs/arquitetura.png) | Diagrama de arquitetura MVC + Service Layer |
-| [`docs/manual-usuario.md`](docs/manual-usuario.md) | Manual do usuário *(entregue no Sprint 4)* |
+Para dúvidas ou solicitações, abra uma issue no repositório ou contate os mantenedores via e-mail listado nos commits.
 
----
-
-## Licença
-
-Projeto acadêmico desenvolvido para a disciplina de Implementação de Software — Unisinos.  
-Uso restrito à avaliação acadêmica.
